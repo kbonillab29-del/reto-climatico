@@ -162,6 +162,58 @@
         .corner-tr{top:8px;right:8px;border-width:2px 2px 0 0;}
         .corner-bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
         .corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            body { align-items: flex-start; overflow-y: auto; }
+            .game-wrap { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; border-left: none; border-right: none; padding: 14px; }
+            .logo-text { font-size: 1.4rem; letter-spacing: 2px; }
+            .sub-tag { font-size: 0.6rem; }
+            .tables-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .table-card { padding: 10px 6px; gap: 5px; }
+            .table-card .icon { font-size: 1.3rem; }
+            .table-card .label { font-size: 0.6rem; }
+            .btn-primary { padding: 12px 28px; font-size: 0.85rem; }
+            #screen-lobby { gap: 16px; }
+            .lobby-logo { font-size: 2.2rem; letter-spacing: 3px; }
+            .lobby-sub { font-size: 0.85rem; }
+            #intro-text { font-size: 0.95rem; }
+            .btn-ghost { padding: 12px 24px; font-size: 0.8rem; }
+            .mesas-status { font-size: 0.65rem; }
+            .gameplay-header { grid-template-columns: 1fr 80px; grid-template-rows: auto auto; gap: 10px; padding: 10px; min-height: unset; }
+            .leaderboard { flex-direction: row; gap: 4px; grid-column: 1 / -1; }
+            .lb-row { flex: 1; padding: 4px 6px; min-height: unset; flex-direction: column; align-items: flex-start; gap: 2px; }
+            .lb-row .lb-name { font-size: 0.58rem; }
+            .lb-row .lb-pts { font-size: 0.62rem; }
+            .timer-ring-svg { width: 75px; height: 75px; }
+            .timer-ring-container { width: 75px; height: 75px; }
+            #timer-display { font-size: 1.3rem; }
+            .mascot-wrap { height: 70px; }
+            .mascot-img { height: 70px; }
+            .mascot-body { width: 55px; height: 52px; }
+            .progress-label { font-size: 0.55rem; }
+            .quiz-main { padding: 12px; gap: 10px; }
+            #question-text { font-size: 0.95rem; }
+            .question-box { padding: 12px 14px; }
+            .options-grid { grid-template-columns: 1fr; gap: 8px; }
+            .option-btn { padding: 12px 14px; gap: 10px; }
+            .opt-letter { font-size: 0.65rem; padding: 2px 6px; }
+            .opt-text { font-size: 0.85rem; }
+            .timeout-text { font-size: 1.3rem; }
+            #dino-sprite { font-size: 3.5rem; }
+            #dino-bubble { font-size: 0.8rem; padding: 4px 10px; }
+            #screen-victory { gap: 10px; }
+            .victory-emoji { font-size: 3.5rem; }
+            #winner-name { font-size: 1.8rem; }
+            .podium-bar { width: 70px; }
+            .victory-footer { flex-direction: column; align-items: center; }
+        }
+        @media (max-width: 400px) {
+            .tables-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            .lobby-logo { font-size: 1.7rem; }
+            .leaderboard { flex-direction: column; }
+            .lb-row { flex-direction: row; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
