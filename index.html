@@ -376,7 +376,7 @@ const PREGUNTAS = [
 
 const ICONOS = ["☁️","⚡","☀️","🌪️","🌊","❄️","🪐","🌍","🍂","🌈","🌦️","🌙","☄️","🌋","🌲","🌵","🌿","💧"];
 const CONFETTI_COLORS = ["#00f2ff","#00ff88","#ffd700","#ff3355","#ffffff","#a78bfa"];
-const TOTAL_TIME = 30;
+const TOTAL_TIME = 60;
 const CIRCUMFERENCE = 2 * Math.PI * 45;
 
 /* ── ESTADO ────────────────────────────────── */
@@ -491,10 +491,23 @@ function escucharLobby(){
 
 document.getElementById('btn-start').addEventListener('click', async ()=>{
     const t=document.getElementById('intro-text');
-    t.textContent='¡INICIALIZANDO RETO CLIMÁTICO!';
+    document.getElementById('btn-start').disabled=true;
     t.classList.add('pulse-tension');
-    playAudio(audioWrong);
-    setTimeout(async()=>{ await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0}); },1100);
+    const cuentas=['3','2','1','¡YA!'];
+    let i=0;
+    function mostrarCuenta(){
+        t.textContent=cuentas[i];
+        playAudio(audioWrong);
+        i++;
+        if(i<cuentas.length){
+            setTimeout(mostrarCuenta,900);
+        } else {
+            setTimeout(async()=>{
+                await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0});
+            },400);
+        }
+    }
+    mostrarCuenta();
 });
 
 /* ── JUEGO ─────────────────────────────────── */
