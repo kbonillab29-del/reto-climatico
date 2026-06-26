@@ -164,6 +164,10 @@
         .corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
 
         /* RESPONSIVE */
+        @keyframes cuentaPulse {
+            0% { transform: scale(1); opacity:0.8; }
+            100% { transform: scale(1.15); opacity:1; text-shadow: 0 0 80px var(--cyan-glow); }
+        }
         @media (max-width: 768px) {
             body { align-items: flex-start; overflow-y: auto; }
             .game-wrap { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; border-left: none; border-right: none; padding: 14px; }
@@ -263,6 +267,14 @@
         <p id="intro-text">Sincronizando sistemas · Esperando moderador</p>
         <div class="mesas-status" id="mesas-status"></div>
         <button id="btn-start" class="btn btn-ghost" style="display:none;">⚡ Lanzar Secuencia de Inicio</button>
+    </section>
+
+    <!-- PANTALLA CUENTA REGRESIVA -->
+    <section id="screen-countdown" class="screen hidden" style="align-items:center;justify-content:center;text-align:center;gap:20px;">
+        <div class="lobby-logo">RETO CLIMÁTICO</div>
+        <div class="sub-tag">Dirección de Climatología — IMHPA</div>
+        <div id="countdown-number" style="font-family:var(--font-tech);font-size:clamp(6rem,20vw,12rem);font-weight:900;color:var(--cyan);text-shadow:0 0 60px var(--cyan-glow);animation:cuentaPulse 0.8s ease infinite alternate;">3</div>
+        <p style="font-family:var(--font-tech);font-size:1rem;color:var(--muted);letter-spacing:3px;">¡PREPÁRENSE!</p>
     </section>
 
     <!-- SCREEN 3: GAMEPLAY -->
@@ -484,30 +496,44 @@ function escucharLobby(){
             document.getElementById('mesas-status').textContent=
                 `Conectadas: ${conectadas.map(k=>'Mesa '+String(k).padStart(2,'0')).join(' · ')}`;
         }
+        if(data.estado==='contando'){ iniciarCuentaRegresiva(); }
         if(data.estado==='jugando'){ showScreen('screen-gameplay'); escucharJuego(); }
         if(data.estado==='terminado'){ mostrarVictoria(data.mesas); }
     });
 }
 
-document.getElementById('btn-start').addEventListener('click', async ()=>{
-    const t=document.getElementById('intro-text');
-    document.getElementById('btn-start').disabled=true;
-    t.classList.add('pulse-tension');
-    const cuentas=['3','2','1','¡YA!'];
-    let i=0;
-    function mostrarCuenta(){
-        t.textContent=cuentas[i];
+let cuentaEnCurso = false;
+function iniciarCuentaRegresiva(){
+    if(cuentaEnCurso) return;
+    cuentaEnCurso = true;
+    showScreen('screen-countdown');
+    const el = document.getElementById('countdown-number');
+    const nums = ['3','2','1','¡YA!'];
+    let i = 0;
+    function tick(){
+        el.textContent = nums[i];
+        el.style.color = i < 3 ? 'var(--cyan)' : 'var(--green)';
+        el.style.textShadow = i < 3 ? '0 0 60px var(--cyan-glow)' : '0 0 60px rgba(0,255,136,0.8)';
         playAudio(audioWrong);
         i++;
-        if(i<cuentas.length){
-            setTimeout(mostrarCuenta,900);
-        } else {
+        if(i < nums.length){
+            setTimeout(tick, 900);
+        }
+        // El juego arranca cuando Firebase cambia a 'jugando'
+        // El moderador lo activa después del ¡YA!
+        if(i === nums.length){
             setTimeout(async()=>{
                 await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0});
-            },400);
+            }, 600);
         }
     }
-    mostrarCuenta();
+    tick();
+}
+
+document.getElementById('btn-start').addEventListener('click', async ()=>{
+    document.getElementById('btn-start').disabled=true;
+    // Guardar estado 'contando' en Firebase para que todos vean la cuenta
+    await update(ref(db,'sesion'),{estado:'contando'});
 });
 
 /* ── JUEGO ─────────────────────────────────── */
