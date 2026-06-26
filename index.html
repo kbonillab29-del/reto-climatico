@@ -208,6 +208,9 @@
             .podium-bar { width: 70px; }
             .victory-footer { flex-direction: column; align-items: center; }
         }
+        .mod-card { border-color: var(--gold) !important; background: rgba(255,215,0,0.08) !important; }
+        .mod-card:hover { box-shadow: 0 0 20px rgba(255,215,0,0.3) !important; }
+        .mod-card.selected { box-shadow: 0 0 20px rgba(255,215,0,0.5) !important; background: rgba(255,215,0,0.15) !important; }
         @media (max-width: 400px) {
             .tables-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .lobby-logo { font-size: 1.7rem; }
