@@ -262,7 +262,7 @@
         <p class="lobby-sub">Sistema de evaluación de conocimientos climáticos. Responde con precisión y velocidad para escalar posiciones.</p>
         <p id="intro-text">Sincronizando sistemas · Esperando moderador</p>
         <div class="mesas-status" id="mesas-status"></div>
-        <button id="btn-start" class="btn btn-ghost">⚡ Lanzar Secuencia de Inicio (Moderador)</button>
+        <button id="btn-start" class="btn btn-ghost" style="display:none;">⚡ Lanzar Secuencia de Inicio</button>
     </section>
 
     <!-- SCREEN 3: GAMEPLAY -->
@@ -422,7 +422,8 @@ async function renderMesas(){
     const snap = await get(ref(db,'sesion/mesas'));
     const ocupadas = snap.exists() ? snap.val() : {};
     grid.innerHTML='';
-    for(let i=1;i<=18;i++){
+    // Mesas 2-18 para participantes
+    for(let i=2;i<=18;i++){
         const btn=document.createElement('button');
         btn.className='table-card';
         const estaOcupada = ocupadas[i] && ocupadas[i].conectada;
@@ -439,13 +440,36 @@ async function renderMesas(){
         }
         grid.appendChild(btn);
     }
+    // Botón moderador al final con estilo dorado
+    const modBtn=document.createElement('button');
+    modBtn.className='table-card mod-card';
+    modBtn.innerHTML=`<span class="icon">🎮</span><span class="label" style="color:var(--gold);letter-spacing:1px;">MODERADOR</span>`;
+    modBtn.addEventListener('click',()=>{
+        document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
+        modBtn.classList.add('selected');
+        miMesa=1;
+        document.getElementById('btn-enter').disabled=false;
+        startMusic();
+    });
+    grid.appendChild(modBtn);
 }
 renderMesas();
 
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
     await set(ref(db,`sesion/mesas/${miMesa}`),{conectada:true,puntos:0});
-    document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — CONECTADA ✓`;
-    document.getElementById('active-mesa').textContent=`MESA ${String(miMesa).padStart(2,'0')}`;
+    if(miMesa===1){
+        // Es el moderador
+        document.getElementById('lobby-badge').textContent='🎮 MODERADOR — CONECTADO ✓';
+        document.getElementById('btn-start').style.display='block';
+        document.getElementById('intro-text').textContent='Esperando que las mesas se conecten...';
+        document.getElementById('active-mesa').textContent='MODERADOR';
+    } else {
+        // Es participante
+        document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — CONECTADA ✓`;
+        document.getElementById('btn-start').style.display='none';
+        document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
+        document.getElementById('active-mesa').textContent=`MESA ${String(miMesa).padStart(2,'0')}`;
+    }
     showScreen('screen-lobby');
     escucharLobby();
 });
