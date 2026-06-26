@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --black:#000000;--navy:#080e1f;--navy-mid:#0d1630;--navy-hi:#162040;
+            --black:#000000;--navy:#080e1f;--navy-hi:#162040;
             --cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.15);--cyan-glow:rgba(0,242,255,0.6);
             --green:#00ff88;--red:#ff3355;--gold:#ffd700;--white:#ffffff;--muted:#94a3b8;
             --border:rgba(0,242,255,0.35);--font-tech:'Orbitron',sans-serif;--font-body:'Inter',sans-serif;
@@ -17,7 +17,9 @@
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         body{background:var(--black);color:var(--white);font-family:var(--font-body);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden;}
-        @keyframes rain{from{transform:translateY(-120px) translateX(0);}to{transform:translateY(110%) translateX(40px);}}
+
+        /* WEATHER */
+        @keyframes rain{from{transform:translateY(-120px);}to{transform:translateY(110%) translateX(40px);}}
         .rain-drop{position:absolute;width:1.5px;background:linear-gradient(to bottom,transparent,rgba(0,242,255,0.65));border-radius:2px;animation:rain linear infinite;}
         @keyframes lightning{0%,90%,92%,96%,100%{opacity:0;}91%,94%,97%{opacity:1;}}
         #lightning-flash{position:absolute;inset:0;background:rgba(150,200,255,0.1);pointer-events:none;animation:lightning 4s infinite;display:none;border-radius:var(--radius);}
@@ -25,18 +27,24 @@
         .snow-flake{position:absolute;color:rgba(200,235,255,0.85);animation:snowfall linear infinite;pointer-events:none;}
         @keyframes aurora{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
         #aurora-layer{position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 0%,rgba(0,255,136,0.06) 30%,rgba(0,242,255,0.08) 60%,transparent 100%);background-size:400% 400%;animation:aurora 8s ease infinite;display:none;border-radius:var(--radius);}
+
+        /* LAYOUT */
         .game-wrap{width:min(98vw,1400px);height:min(96vh,900px);background:rgba(4,6,16,0.93);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:0 0 60px rgba(0,242,255,0.18),inset 0 1px 0 rgba(0,242,255,0.1);padding:22px;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
         #weather-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:var(--radius);overflow:hidden;}
         .screen{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;}
         .hidden{display:none!important;}
-        .logo-text{font-family:var(--font-tech);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;letter-spacing:5px;color:var(--white);text-shadow:0 0 30px var(--cyan-glow);}
+
+        /* SHARED */
+        .logo-text{font-family:var(--font-tech);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;letter-spacing:5px;text-shadow:0 0 30px var(--cyan-glow);}
         .sub-tag{font-family:var(--font-tech);font-size:0.7rem;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-top:4px;}
         .btn{font-family:var(--font-tech);font-weight:700;border:none;cursor:pointer;border-radius:var(--radius-sm);transition:all var(--transition);text-transform:uppercase;letter-spacing:1px;}
         .btn-primary{background:var(--cyan);color:var(--black);padding:13px 44px;font-size:1rem;box-shadow:0 0 20px rgba(0,242,255,0.35);}
         .btn-primary:hover:not(:disabled){background:var(--white);box-shadow:0 0 35px rgba(255,255,255,0.6);transform:translateY(-1px);}
         .btn-primary:disabled{background:var(--navy-hi);color:#475569;cursor:not-allowed;box-shadow:none;}
-        .btn-ghost{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan);padding:13px 44px;font-size:1rem;}
-        .btn-ghost:hover{background:var(--cyan-dim);box-shadow:0 0 20px var(--cyan-glow);}
+        .btn-ghost{background:transparent;color:var(--gold);border:2px solid var(--gold);padding:13px 44px;font-size:1rem;box-shadow:0 0 15px rgba(255,215,0,0.2);}
+        .btn-ghost:hover{background:rgba(255,215,0,0.1);box-shadow:0 0 25px rgba(255,215,0,0.4);}
+
+        /* SCREEN 1: LOGIN */
         #screen-login header{text-align:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);}
         #screen-login header p{color:var(--muted);font-size:0.85rem;margin-top:8px;letter-spacing:1px;}
         .tables-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;flex:1;margin-bottom:18px;overflow:hidden;}
@@ -44,23 +52,35 @@
         .table-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-dim),transparent);opacity:0;transition:opacity var(--transition);}
         .table-card:hover{border-color:var(--cyan);transform:translateY(-2px);}
         .table-card:hover::before{opacity:1;}
-        .table-card.selected{border-color:var(--cyan);background:rgba(0,242,255,0.12);box-shadow:0 0 20px rgba(0,242,255,0.4),inset 0 0 10px rgba(0,242,255,0.08);transform:translateY(-2px) scale(1.03);}
+        .table-card.selected{border-color:var(--cyan);background:rgba(0,242,255,0.12);box-shadow:0 0 20px rgba(0,242,255,0.4);transform:translateY(-2px) scale(1.03);}
         .table-card.selected::before{opacity:1;}
         .table-card.ocupada{border-color:var(--red);background:rgba(255,51,85,0.08);opacity:0.6;cursor:not-allowed;}
         .table-card .icon{font-size:1.6rem;}
-        .table-card .label{font-family:var(--font-tech);font-size:0.7rem;font-weight:700;color:var(--white);letter-spacing:1px;}
+        .table-card .label{font-family:var(--font-tech);font-size:0.7rem;font-weight:700;letter-spacing:1px;}
         .table-card.selected .label{color:var(--cyan);}
         .table-card small{font-size:0.55rem;color:var(--red);font-family:var(--font-tech);}
+        .mod-card{border-color:var(--gold)!important;background:rgba(255,215,0,0.06)!important;}
+        .mod-card:hover{box-shadow:0 0 20px rgba(255,215,0,0.3)!important;}
+        .mod-card.selected{border-color:var(--gold)!important;background:rgba(255,215,0,0.15)!important;box-shadow:0 0 20px rgba(255,215,0,0.4)!important;}
         .login-footer{display:flex;justify-content:center;}
-        #screen-lobby{align-items:center;justify-content:center;gap:28px;text-align:center;}
+
+        /* SCREEN 2: LOBBY */
+        #screen-lobby{align-items:center;justify-content:center;gap:22px;text-align:center;}
         .lobby-badge{background:rgba(0,242,255,0.08);border:1px solid var(--border);border-radius:50px;padding:7px 20px;font-size:0.8rem;color:var(--cyan);font-family:var(--font-tech);letter-spacing:2px;animation:badgePulse 2s ease infinite;}
         @keyframes badgePulse{0%,100%{box-shadow:0 0 10px rgba(0,242,255,0.2);}50%{box-shadow:0 0 25px rgba(0,242,255,0.5);}}
-        .lobby-logo{font-family:var(--font-tech);font-size:clamp(3rem,6vw,5rem);font-weight:900;color:var(--white);text-shadow:0 0 40px var(--cyan-glow),0 0 80px rgba(0,242,255,0.3);letter-spacing:6px;}
-        .lobby-sub{color:var(--muted);font-size:1rem;max-width:480px;line-height:1.6;}
-        #intro-text{font-size:1.1rem;color:var(--white);font-weight:600;}
-        .mesas-status{font-family:var(--font-tech);font-size:0.75rem;color:var(--cyan);letter-spacing:1px;}
-        @keyframes tensionPulse{0%,100%{transform:scale(1);color:var(--white);}50%{transform:scale(1.04);color:var(--red);}}
-        .pulse-tension{animation:tensionPulse 0.5s ease infinite;}
+        .lobby-logo{font-family:var(--font-tech);font-size:clamp(2.5rem,6vw,5rem);font-weight:900;text-shadow:0 0 40px var(--cyan-glow);letter-spacing:6px;}
+        .lobby-sub{color:var(--muted);font-size:0.95rem;max-width:480px;line-height:1.6;}
+        #intro-text{font-size:1.1rem;font-weight:600;}
+        .mesas-status{font-family:var(--font-tech);font-size:0.72rem;color:var(--cyan);letter-spacing:1px;max-width:600px;line-height:1.6;}
+        .mod-notice{font-family:var(--font-tech);font-size:0.8rem;color:var(--muted);border:1px solid rgba(255,215,0,0.3);padding:10px 20px;border-radius:8px;background:rgba(255,215,0,0.05);}
+
+        /* SCREEN 3: CUENTA REGRESIVA */
+        #screen-countdown{align-items:center;justify-content:center;text-align:center;gap:20px;}
+        .countdown-num{font-family:var(--font-tech);font-size:clamp(7rem,25vw,14rem);font-weight:900;color:var(--cyan);text-shadow:0 0 80px var(--cyan-glow);animation:cuentaPulse 0.8s ease infinite alternate;line-height:1;}
+        @keyframes cuentaPulse{0%{transform:scale(1);opacity:0.85;}100%{transform:scale(1.1);opacity:1;}}
+        .countdown-label{font-family:var(--font-tech);font-size:1rem;color:var(--muted);letter-spacing:4px;}
+
+        /* SCREEN 4: GAMEPLAY */
         #screen-gameplay{gap:14px;}
         .gameplay-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--navy);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 20px;gap:16px;min-height:130px;}
         .leaderboard{display:flex;flex-direction:column;gap:5px;}
@@ -68,8 +88,8 @@
         .lb-row.top1{border-left-color:var(--gold);box-shadow:0 0 10px rgba(255,215,0,0.15);}
         .lb-row.top2{border-left-color:#c0c0c0;}
         .lb-row.top3{border-left-color:#cd7f32;}
-        .lb-row .lb-name{font-family:var(--font-tech);font-size:0.7rem;color:var(--white);}
-        .lb-row .lb-pts{font-family:var(--font-tech);font-size:0.75rem;font-weight:700;color:var(--cyan);}
+        .lb-name{font-family:var(--font-tech);font-size:0.7rem;}
+        .lb-pts{font-family:var(--font-tech);font-size:0.75rem;font-weight:700;color:var(--cyan);}
         .lb-row.top1 .lb-pts{color:var(--gold);}
         .timer-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
         .timer-ring-svg{width:110px;height:110px;transform:rotate(-90deg);}
@@ -77,7 +97,7 @@
         .timer-ring-fill{fill:none;stroke:var(--cyan);stroke-width:5;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke 0.5s;}
         .timer-ring-text-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
         .timer-ring-container{position:relative;width:110px;height:110px;}
-        #timer-display{font-family:var(--font-tech);font-size:1.9rem;font-weight:900;color:var(--white);text-shadow:0 0 15px var(--cyan-glow);}
+        #timer-display{font-family:var(--font-tech);font-size:1.9rem;font-weight:900;text-shadow:0 0 15px var(--cyan-glow);}
         .timer-urgent #timer-display{color:var(--red);text-shadow:0 0 15px rgba(255,51,85,0.8);}
         .timer-urgent .timer-ring-fill{stroke:var(--red);}
         @keyframes timerShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
@@ -88,7 +108,7 @@
         .mascot-img{height:110px;width:auto;animation:mascotFloat 3s ease-in-out infinite;}
         @keyframes mascotFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
         .mascot-css{animation:mascotFloat 3s ease-in-out infinite;}
-        .mascot-body{width:80px;height:75px;background:linear-gradient(135deg,#1a3a5c,#0d2240);border:2px solid var(--cyan);border-radius:50% 50% 45% 45%;position:relative;box-shadow:0 0 18px rgba(0,242,255,0.4),inset 0 0 10px rgba(0,242,255,0.08);}
+        .mascot-body{width:80px;height:75px;background:linear-gradient(135deg,#1a3a5c,#0d2240);border:2px solid var(--cyan);border-radius:50% 50% 45% 45%;position:relative;box-shadow:0 0 18px rgba(0,242,255,0.4);}
         .mascot-face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
         .mascot-eyes{display:flex;gap:14px;}
         .eye{width:12px;height:12px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:eyeBlink 3s ease infinite;}
@@ -111,7 +131,7 @@
         .q-number{font-family:var(--font-tech);font-size:0.65rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);padding:4px 10px;border-radius:4px;white-space:nowrap;}
         .q-category{font-size:0.75rem;color:var(--muted);}
         .question-box{background:rgba(13,22,48,0.8);border:1px solid var(--border);border-radius:10px;padding:18px 22px;}
-        #question-text{font-size:clamp(1rem,2vw,1.35rem);font-weight:600;line-height:1.55;color:var(--white);}
+        #question-text{font-size:clamp(1rem,2vw,1.35rem);font-weight:600;line-height:1.55;}
         .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;}
         .option-btn{background:rgba(13,22,48,0.8);border:1.5px solid rgba(71,85,105,0.5);border-radius:10px;padding:18px 20px;cursor:pointer;text-align:left;transition:all var(--transition);display:flex;align-items:center;gap:14px;font-family:var(--font-body);position:relative;overflow:hidden;}
         .option-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-dim),transparent);opacity:0;transition:opacity var(--transition);}
@@ -119,11 +139,11 @@
         .option-btn:hover:not(:disabled)::before{opacity:1;}
         .option-btn:disabled{cursor:not-allowed;}
         .opt-letter{font-family:var(--font-tech);font-size:0.75rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);border-radius:4px;padding:3px 8px;flex-shrink:0;transition:all var(--transition);}
-        .opt-text{font-size:0.95rem;font-weight:500;color:var(--white);line-height:1.45;transition:all var(--transition);}
+        .opt-text{font-size:0.95rem;font-weight:500;line-height:1.45;transition:all var(--transition);}
         .opt-correct{background:rgba(0,255,136,0.12)!important;border-color:var(--green)!important;box-shadow:0 0 20px rgba(0,255,136,0.2)!important;}
         .opt-correct .opt-letter{background:var(--green);color:var(--black);border-color:var(--green);}
         .opt-correct .opt-text{color:var(--green)!important;}
-        .opt-wrong{background:rgba(255,51,85,0.12)!important;border-color:var(--red)!important;box-shadow:0 0 15px rgba(255,51,85,0.15)!important;}
+        .opt-wrong{background:rgba(255,51,85,0.12)!important;border-color:var(--red)!important;}
         .opt-wrong .opt-letter{background:var(--red);color:var(--white);border-color:var(--red);}
         .opt-wrong .opt-text{color:var(--red)!important;}
         .dino-overlay{position:absolute;inset:0;pointer-events:none;z-index:20;}
@@ -136,6 +156,8 @@
         @keyframes timeoutSlide{0%{opacity:0;transform:translateY(-20px);}20%,80%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-20px);}}
         .timeout-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:15;pointer-events:none;}
         .timeout-text{font-family:var(--font-tech);font-size:2rem;font-weight:900;color:var(--red);text-shadow:0 0 30px rgba(255,51,85,0.7);letter-spacing:4px;animation:timeoutSlide 1.5s ease forwards;}
+
+        /* SCREEN 5: VICTORY */
         #screen-victory{align-items:center;justify-content:center;gap:16px;text-align:center;}
         .victory-title{font-family:var(--font-tech);font-size:0.75rem;letter-spacing:4px;color:var(--muted);}
         #winner-name{font-family:var(--font-tech);font-size:clamp(2rem,5vw,3.8rem);font-weight:900;color:var(--cyan);text-shadow:0 0 40px var(--cyan-glow);}
@@ -146,16 +168,18 @@
         .victory-podium{display:flex;gap:10px;align-items:flex-end;justify-content:center;padding:10px;}
         .podium-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
         .podium-col .medal{font-size:1.4rem;}
-        .podium-bar{width:90px;background:var(--navy-hi);border:1px solid var(--border);border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px 6px;gap:4px;transition:all 0.5s ease;}
+        .podium-bar{width:90px;background:var(--navy-hi);border:1px solid var(--border);border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px 6px;gap:4px;}
         .podium-col.gold .podium-bar{border-color:var(--gold);box-shadow:0 0 15px rgba(255,215,0,0.2);}
         .podium-col.silver .podium-bar{border-color:#c0c0c0;}
         .podium-col.bronze .podium-bar{border-color:#cd7f32;}
-        .podium-mesa{font-family:var(--font-tech);font-size:0.65rem;color:var(--white);}
+        .podium-mesa{font-family:var(--font-tech);font-size:0.65rem;}
         .podium-pts{font-family:var(--font-tech);font-size:0.75rem;font-weight:700;}
         .podium-col.gold .podium-pts{color:var(--gold);}
         .podium-col.silver .podium-pts{color:#c0c0c0;}
         .podium-col.bronze .podium-pts{color:#cd7f32;}
         .victory-footer{display:flex;gap:12px;}
+
+        /* DECORACIONES */
         .scan-lines{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);}
         .corner{position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;pointer-events:none;}
         .corner-tl{top:8px;left:8px;border-width:2px 0 0 2px;}
@@ -164,68 +188,41 @@
         .corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
 
         /* RESPONSIVE */
-        @keyframes cuentaPulse {
-            0% { transform: scale(1); opacity:0.8; }
-            100% { transform: scale(1.15); opacity:1; text-shadow: 0 0 80px var(--cyan-glow); }
-        }
         @media (max-width: 768px) {
-            body { align-items: flex-start; overflow-y: auto; }
-            .game-wrap { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; border-left: none; border-right: none; padding: 14px; }
-            .logo-text { font-size: 1.4rem; letter-spacing: 2px; }
-            .sub-tag { font-size: 0.6rem; }
-            .tables-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .table-card { padding: 10px 6px; gap: 5px; }
-            .table-card .icon { font-size: 1.3rem; }
-            .table-card .label { font-size: 0.6rem; }
-            .btn-primary { padding: 12px 28px; font-size: 0.85rem; }
-            #screen-lobby { gap: 16px; }
-            .lobby-logo { font-size: 2.2rem; letter-spacing: 3px; }
-            .lobby-sub { font-size: 0.85rem; }
-            #intro-text { font-size: 0.95rem; }
-            .btn-ghost { padding: 12px 24px; font-size: 0.8rem; }
-            .mesas-status { font-size: 0.65rem; }
-            .gameplay-header { grid-template-columns: 1fr 80px; grid-template-rows: auto auto; gap: 10px; padding: 10px; min-height: unset; }
-            .leaderboard { flex-direction: row; gap: 4px; grid-column: 1 / -1; }
-            .lb-row { flex: 1; padding: 4px 6px; min-height: unset; flex-direction: column; align-items: flex-start; gap: 2px; }
-            .lb-row .lb-name { font-size: 0.58rem; }
-            .lb-row .lb-pts { font-size: 0.62rem; }
-            .timer-ring-svg { width: 75px; height: 75px; }
-            .timer-ring-container { width: 75px; height: 75px; }
-            #timer-display { font-size: 1.3rem; }
-            .mascot-wrap { height: 70px; }
-            .mascot-img { height: 70px; }
-            .mascot-body { width: 55px; height: 52px; }
-            .progress-label { font-size: 0.55rem; }
-            .quiz-main { padding: 12px; gap: 10px; }
-            #question-text { font-size: 0.95rem; }
-            .question-box { padding: 12px 14px; }
-            .options-grid { grid-template-columns: 1fr; gap: 8px; }
-            .option-btn { padding: 12px 14px; gap: 10px; }
-            .opt-letter { font-size: 0.65rem; padding: 2px 6px; }
-            .opt-text { font-size: 0.85rem; }
-            .timeout-text { font-size: 1.3rem; }
-            #dino-sprite { font-size: 3.5rem; }
-            #dino-bubble { font-size: 0.8rem; padding: 4px 10px; }
-            #screen-victory { gap: 10px; }
-            .victory-emoji { font-size: 3.5rem; }
-            #winner-name { font-size: 1.8rem; }
-            .podium-bar { width: 70px; }
-            .victory-footer { flex-direction: column; align-items: center; }
-        }
-        .mod-card { border-color: var(--gold) !important; background: rgba(255,215,0,0.08) !important; }
-        .mod-card:hover { box-shadow: 0 0 20px rgba(255,215,0,0.3) !important; }
-        .mod-card.selected { box-shadow: 0 0 20px rgba(255,215,0,0.5) !important; background: rgba(255,215,0,0.15) !important; }
-        @media (max-width: 400px) {
-            .tables-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
-            .lobby-logo { font-size: 1.7rem; }
-            .leaderboard { flex-direction: column; }
-            .lb-row { flex-direction: row; justify-content: space-between; }
+            body{align-items:flex-start;overflow-y:auto;}
+            .game-wrap{width:100vw;height:auto;min-height:100vh;border-radius:0;border-left:none;border-right:none;padding:14px;}
+            .logo-text{font-size:1.4rem;letter-spacing:2px;}
+            .tables-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
+            .table-card{padding:10px 6px;gap:5px;}
+            .table-card .icon{font-size:1.3rem;}
+            .table-card .label{font-size:0.6rem;}
+            .btn-primary{padding:12px 28px;font-size:0.85rem;}
+            .lobby-logo{font-size:2rem;letter-spacing:3px;}
+            .btn-ghost{padding:12px 24px;font-size:0.8rem;}
+            .countdown-num{font-size:clamp(5rem,20vw,10rem);}
+            .gameplay-header{grid-template-columns:1fr 80px;grid-template-rows:auto auto;gap:10px;padding:10px;min-height:unset;}
+            .leaderboard{flex-direction:row;gap:4px;grid-column:1 / -1;}
+            .lb-row{flex:1;padding:4px 6px;min-height:unset;flex-direction:column;align-items:flex-start;gap:2px;}
+            .lb-name{font-size:0.58rem;}
+            .lb-pts{font-size:0.62rem;}
+            .timer-ring-svg{width:75px;height:75px;}
+            .timer-ring-container{width:75px;height:75px;}
+            #timer-display{font-size:1.3rem;}
+            .mascot-wrap{height:70px;}
+            .mascot-img{height:70px;}
+            .quiz-main{padding:12px;gap:10px;}
+            #question-text{font-size:0.95rem;}
+            .question-box{padding:12px 14px;}
+            .options-grid{grid-template-columns:1fr;gap:8px;}
+            .option-btn{padding:12px 14px;gap:10px;}
+            .opt-text{font-size:0.85rem;}
+            #winner-name{font-size:1.8rem;}
+            .podium-bar{width:70px;}
         }
     </style>
 </head>
 <body>
 <div class="scan-lines"></div>
-
 <audio id="audio-bg" loop preload="auto">
     <source src="audio/ambiente_tension.wav" type="audio/wav">
     <source src="audio/ambiente_tension.mp3" type="audio/mpeg">
@@ -236,14 +233,9 @@
 </audio>
 
 <div class="game-wrap">
-    <div id="weather-canvas">
-        <div id="lightning-flash"></div>
-        <div id="aurora-layer"></div>
-    </div>
-    <div class="corner corner-tl"></div>
-    <div class="corner corner-tr"></div>
-    <div class="corner corner-bl"></div>
-    <div class="corner corner-br"></div>
+    <div id="weather-canvas"><div id="lightning-flash"></div><div id="aurora-layer"></div></div>
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div><div class="corner corner-br"></div>
 
     <!-- SCREEN 1: LOGIN -->
     <section id="screen-login" class="screen">
@@ -264,20 +256,23 @@
         <div class="lobby-logo">RETO CLIMÁTICO</div>
         <div class="sub-tag">Dirección de Climatología — IMHPA</div>
         <p class="lobby-sub">Sistema de evaluación de conocimientos climáticos. Responde con precisión y velocidad para escalar posiciones.</p>
-        <p id="intro-text">Sincronizando sistemas · Esperando moderador</p>
+        <p id="intro-text" style="font-size:1.1rem;font-weight:600;">Esperando al moderador para comenzar...</p>
         <div class="mesas-status" id="mesas-status"></div>
+        <!-- Solo visible para el moderador -->
         <button id="btn-start" class="btn btn-ghost" style="display:none;">⚡ Lanzar Secuencia de Inicio</button>
+        <p id="mod-notice" class="mod-notice" style="display:none;">Eres el moderador. Cuando todas las mesas estén conectadas, presiona el botón.</p>
     </section>
 
-    <!-- PANTALLA CUENTA REGRESIVA -->
-    <section id="screen-countdown" class="screen hidden" style="align-items:center;justify-content:center;text-align:center;gap:20px;">
-        <div class="lobby-logo">RETO CLIMÁTICO</div>
+    <!-- SCREEN 3: CUENTA REGRESIVA -->
+    <section id="screen-countdown" class="screen hidden">
+        <div class="lobby-logo" style="margin-top:auto;">RETO CLIMÁTICO</div>
         <div class="sub-tag">Dirección de Climatología — IMHPA</div>
-        <div id="countdown-number" style="font-family:var(--font-tech);font-size:clamp(6rem,20vw,12rem);font-weight:900;color:var(--cyan);text-shadow:0 0 60px var(--cyan-glow);animation:cuentaPulse 0.8s ease infinite alternate;">3</div>
-        <p style="font-family:var(--font-tech);font-size:1rem;color:var(--muted);letter-spacing:3px;">¡PREPÁRENSE!</p>
+        <div id="countdown-number" class="countdown-num">3</div>
+        <p class="countdown-label">¡PREPÁRENSE!</p>
+        <div style="margin-bottom:auto;"></div>
     </section>
 
-    <!-- SCREEN 3: GAMEPLAY -->
+    <!-- SCREEN 4: GAMEPLAY -->
     <section id="screen-gameplay" class="screen hidden">
         <header class="gameplay-header">
             <div class="leaderboard" id="leaderboard">
@@ -291,14 +286,14 @@
                         <circle class="timer-ring-bg" cx="50" cy="50" r="45"/>
                         <circle class="timer-ring-fill" id="timer-ring" cx="50" cy="50" r="45"/>
                     </svg>
-                    <div class="timer-ring-text-wrap"><span id="timer-display">30</span></div>
+                    <div class="timer-ring-text-wrap"><span id="timer-display">60</span></div>
                 </div>
                 <div class="timer-label">SEGUNDOS</div>
             </div>
             <div class="mascot-zone">
-                <div class="mascot-wrap" id="mascot-wrap">
+                <div class="mascot-wrap">
                     <video id="mascot-src" class="mascot-img" autoplay loop muted playsinline
-                           oncanplay="this.style.display='block'; document.getElementById('mascot-css').style.display='none'"
+                           oncanplay="this.style.display='block';document.getElementById('mascot-css').style.display='none'"
                            onerror="document.getElementById('mascot-css').style.display='block'"
                            style="display:none">
                         <source src="Diseño sin título.mp4" type="video/mp4">
@@ -309,23 +304,18 @@
                                 <div class="mascot-eyes"><div class="eye"></div><div class="eye"></div></div>
                                 <div class="mascot-mouth"></div>
                             </div>
-                            <div class="mascot-arms">
-                                <div class="arm arm-l"></div>
-                                <div class="arm arm-r"></div>
-                            </div>
+                            <div class="mascot-arms"><div class="arm arm-l"></div><div class="arm arm-r"></div></div>
                         </div>
                         <div class="mascot-shadow"></div>
                     </div>
                 </div>
             </div>
         </header>
-
         <div class="progress-bar-wrap">
             <span class="progress-label" id="q-progress">PREGUNTA 1 / 12</span>
             <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
             <span class="progress-label" id="active-mesa">MULTIJUGADOR</span>
         </div>
-
         <main class="quiz-main">
             <div class="dino-overlay">
                 <div id="dino-sprite">🦖</div>
@@ -340,7 +330,7 @@
         </main>
     </section>
 
-    <!-- SCREEN 4: VICTORY -->
+    <!-- SCREEN 5: VICTORY -->
     <section id="screen-victory" class="screen hidden">
         <div class="victory-title">SISTEMA COMPLETADO · CLASIFICACIÓN FINAL</div>
         <span class="victory-emoji">🏆</span>
@@ -353,7 +343,6 @@
     </section>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -370,11 +359,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-/* ── PREGUNTAS ─────────────────────────────── */
 const PREGUNTAS = [
     { pregunta:"¿Cuántos países de Centroamérica forman parte del grupo de trabajo regional y cuáles son?", categoria:"Colaboración Regional", opciones:[{texto:"Son 6 países: Guatemala, El Salvador, Honduras, Costa Rica, Panamá y Nicaragua.",correcta:true},{texto:"Son 5 países: Guatemala, Honduras, Costa Rica, Panamá y Nicaragua — El Salvador no participa.",correcta:false}]},
     { pregunta:"¿Qué institución de España participa en la coordinación técnica y cuál es su rol?", categoria:"Actores Institucionales", opciones:[{texto:"El CSIC lidera la coordinación científica y FIIAPP administra los fondos.",correcta:false},{texto:"AEMET aporta la coordinación técnica y metodológica; FIIAPP gestiona la implementación de EUROCLIMA+.",correcta:true}]},
-    { pregunta:"🧠 ¿Por qué es importante que cada país tenga representantes en el grupo de trabajo?", categoria:"Metodología", opciones:[{texto:"Porque cada país tiene condiciones climáticas y contextos distintos, lo que garantiza escenarios pertinentes y fortalece capacidades nacionales.",correcta:true},{texto:"Porque los organismos internacionales exigen que cada país firme los informes finales como requisito legal.",correcta:false}]},
+    { pregunta:"🧠 ¿Por qué es importante que cada país tenga representantes en el grupo de trabajo?", categoria:"Metodología", opciones:[{texto:"Porque cada país tiene condiciones climáticas y contextos distintos, garantizando escenarios pertinentes y fortaleciendo capacidades nacionales.",correcta:true},{texto:"Porque los organismos internacionales exigen que cada país firme los informes finales como requisito legal.",correcta:false}]},
     { pregunta:"¿Cuál es la diferencia entre los escenarios RCP y los SSP?", categoria:"Escenarios Climáticos", opciones:[{texto:"Los RCP se basan únicamente en concentraciones de CO₂, mientras que los SSP consideran variables económicas como el PIB.",correcta:false},{texto:"Los RCP representan sendas de concentración de gases; los SSP incorporan además narrativas socioeconómicas.",correcta:true}]},
     { pregunta:"¿Por qué se seleccionó el método PSDM para Centroamérica?", categoria:"Downscaling Estadístico", opciones:[{texto:"Porque el PSDM fue el único método evaluado en el estudio.",correcta:false},{texto:"Porque los métodos de regresión y análogos no mostraron buenos resultados; el PSDM demostró el mejor desempeño en corrección de sesgos.",correcta:true}]},
     { pregunta:"📋 ¿Cuáles fueron los tres criterios para seleccionar los 12 modelos GCM?", categoria:"Modelos Climáticos", opciones:[{texto:"Disponibilidad de variables climáticas requeridas, buen desempeño histórico y dispersión en proyecciones futuras bajo SSP5-8.5.",correcta:true},{texto:"Resolución espacial superior a 10 km, origen en instituciones certificadas por la OMM y disponibilidad de datos.",correcta:false}]},
@@ -390,25 +378,24 @@ const ICONOS = ["☁️","⚡","☀️","🌪️","🌊","❄️","🪐","🌍",
 const CONFETTI_COLORS = ["#00f2ff","#00ff88","#ffd700","#ff3355","#ffffff","#a78bfa"];
 const TOTAL_TIME = 60;
 const CIRCUMFERENCE = 2 * Math.PI * 45;
+const SCREENS = ['screen-login','screen-lobby','screen-countdown','screen-gameplay','screen-victory'];
 
-/* ── ESTADO ────────────────────────────────── */
 let miMesa = null;
+let esModerador = false;
 let yaRespondi = false;
 let timerInterval = null;
 let timerSec = TOTAL_TIME;
 let preguntaLocal = -1;
+let cuentaEnCurso = false;
+let escuchandoJuego = false;
 
-/* ── AUDIO ─────────────────────────────────── */
 const audioBg    = document.getElementById('audio-bg');
 const audioWrong = document.getElementById('audio-wrong');
 function playAudio(el){ if(!el) return; el.currentTime=0; el.play().catch(()=>{}); }
 function startMusic(){ audioBg.volume=0.22; audioBg.play().catch(()=>{}); }
-
-/* ── SCREENS ───────────────────────────────── */
-const SCREENS=['screen-login','screen-lobby','screen-gameplay','screen-victory'];
 function showScreen(id){ SCREENS.forEach(s=>document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
 
-/* ── WEATHER ───────────────────────────────── */
+// WEATHER
 const wCanvas=document.getElementById('weather-canvas');
 const lightning=document.getElementById('lightning-flash');
 const aurora=document.getElementById('aurora-layer');
@@ -427,9 +414,8 @@ function spawnWeather(){
     } else { aurora.style.display='block'; }
 }
 
-/* ── LOGIN ─────────────────────────────────── */
+// ── RENDER MESAS ──────────────────────────────────────────
 const grid = document.getElementById('tables-grid');
-
 async function renderMesas(){
     const snap = await get(ref(db,'sesion/mesas'));
     const ocupadas = snap.exists() ? snap.val() : {};
@@ -445,21 +431,21 @@ async function renderMesas(){
             btn.addEventListener('click',()=>{
                 document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
                 btn.classList.add('selected');
-                miMesa=i;
+                miMesa=i; esModerador=false;
                 document.getElementById('btn-enter').disabled=false;
                 startMusic();
             });
         }
         grid.appendChild(btn);
     }
-    // Botón moderador al final con estilo dorado
+    // Botón moderador al final
     const modBtn=document.createElement('button');
     modBtn.className='table-card mod-card';
-    modBtn.innerHTML=`<span class="icon">🎮</span><span class="label" style="color:var(--gold);letter-spacing:1px;">MODERADOR</span>`;
+    modBtn.innerHTML=`<span class="icon">🎮</span><span class="label" style="color:var(--gold)">MODERADOR</span>`;
     modBtn.addEventListener('click',()=>{
         document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
         modBtn.classList.add('selected');
-        miMesa=1;
+        miMesa=1; esModerador=true;
         document.getElementById('btn-enter').disabled=false;
         startMusic();
     });
@@ -467,87 +453,101 @@ async function renderMesas(){
 }
 renderMesas();
 
+// ── ENTRAR AL LOBBY ───────────────────────────────────────
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
     await set(ref(db,`sesion/mesas/${miMesa}`),{conectada:true,puntos:0});
-    if(miMesa===1){
-        // Es el moderador
+
+    if(esModerador){
         document.getElementById('lobby-badge').textContent='🎮 MODERADOR — CONECTADO ✓';
+        document.getElementById('intro-text').textContent='Esperando que todas las mesas se conecten...';
         document.getElementById('btn-start').style.display='block';
-        document.getElementById('intro-text').textContent='Esperando que las mesas se conecten...';
+        document.getElementById('mod-notice').style.display='block';
         document.getElementById('active-mesa').textContent='MODERADOR';
     } else {
-        // Es participante
         document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — CONECTADA ✓`;
-        document.getElementById('btn-start').style.display='none';
         document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
+        document.getElementById('btn-start').style.display='none';
+        document.getElementById('mod-notice').style.display='none';
         document.getElementById('active-mesa').textContent=`MESA ${String(miMesa).padStart(2,'0')}`;
     }
     showScreen('screen-lobby');
-    escucharLobby();
+    escucharSesion();
 });
 
-/* ── LOBBY ─────────────────────────────────── */
-function escucharLobby(){
+// ── ESCUCHAR SESIÓN (lobby + juego) ──────────────────────
+function escucharSesion(){
     onValue(ref(db,'sesion'),(snap)=>{
         if(!snap.exists()) return;
         const data=snap.val();
-        if(data.mesas){
-            const conectadas=Object.keys(data.mesas).filter(k=>data.mesas[k].conectada);
+
+        // Actualizar mesas conectadas en lobby
+        if(data.mesas && document.getElementById('screen-lobby') && !document.getElementById('screen-lobby').classList.contains('hidden')){
+            const conectadas=Object.keys(data.mesas).filter(k=>data.mesas[k].conectada && k!='1');
             document.getElementById('mesas-status').textContent=
-                `Conectadas: ${conectadas.map(k=>'Mesa '+String(k).padStart(2,'0')).join(' · ')}`;
+                conectadas.length>0
+                ? `Conectadas: ${conectadas.map(k=>'Mesa '+String(k).padStart(2,'0')).join(' · ')}`
+                : 'Ninguna mesa conectada aún...';
         }
-        if(data.estado==='contando'){ iniciarCuentaRegresiva(); }
-        if(data.estado==='jugando'){ showScreen('screen-gameplay'); escucharJuego(); }
-        if(data.estado==='terminado'){ mostrarVictoria(data.mesas); }
+
+        // Actualizar leaderboard si estamos jugando
+        if(data.mesas) actualizarLeaderboard(data.mesas);
+
+        // Manejo de estados
+        if(data.estado==='contando' && !cuentaEnCurso){
+            iniciarCuenta();
+        }
+        if(data.estado==='jugando' && !escuchandoJuego){
+            escuchandoJuego=true;
+            showScreen('screen-gameplay');
+            const idx=data.preguntaActual??0;
+            if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
+        }
+        if(data.estado==='jugando' && escuchandoJuego){
+            const idx=data.preguntaActual??0;
+            if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
+        }
+        if(data.estado==='terminado'){
+            clearInterval(timerInterval);
+            mostrarVictoria(data.mesas);
+        }
     });
 }
 
-let cuentaEnCurso = false;
-function iniciarCuentaRegresiva(){
-    if(cuentaEnCurso) return;
-    cuentaEnCurso = true;
+// ── MODERADOR: INICIAR ────────────────────────────────────
+document.getElementById('btn-start').addEventListener('click', async ()=>{
+    document.getElementById('btn-start').disabled=true;
+    // Poner estado 'contando' en Firebase — todos verán la cuenta
+    await update(ref(db,'sesion'),{estado:'contando'});
+});
+
+// ── CUENTA REGRESIVA (en todas las pantallas) ─────────────
+function iniciarCuenta(){
+    cuentaEnCurso=true;
     showScreen('screen-countdown');
-    const el = document.getElementById('countdown-number');
-    const nums = ['3','2','1','¡YA!'];
-    let i = 0;
+    const el=document.getElementById('countdown-number');
+    const nums=['3','2','1','¡YA!'];
+    let i=0;
     function tick(){
-        el.textContent = nums[i];
-        el.style.color = i < 3 ? 'var(--cyan)' : 'var(--green)';
-        el.style.textShadow = i < 3 ? '0 0 60px var(--cyan-glow)' : '0 0 60px rgba(0,255,136,0.8)';
+        el.textContent=nums[i];
+        el.style.color = i<3 ? 'var(--cyan)' : 'var(--green)';
+        el.style.textShadow = i<3 ? '0 0 80px var(--cyan-glow)' : '0 0 80px rgba(0,255,136,0.8)';
         playAudio(audioWrong);
         i++;
-        if(i < nums.length){
-            setTimeout(tick, 900);
-        }
-        // El juego arranca cuando Firebase cambia a 'jugando'
-        // El moderador lo activa después del ¡YA!
-        if(i === nums.length){
-            setTimeout(async()=>{
-                await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0});
-            }, 600);
+        if(i<nums.length){
+            setTimeout(tick,900);
+        } else {
+            // Solo el moderador escribe 'jugando' en Firebase
+            if(esModerador){
+                setTimeout(async()=>{
+                    await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0});
+                },600);
+            }
         }
     }
     tick();
 }
 
-document.getElementById('btn-start').addEventListener('click', async ()=>{
-    document.getElementById('btn-start').disabled=true;
-    // Guardar estado 'contando' en Firebase para que todos vean la cuenta
-    await update(ref(db,'sesion'),{estado:'contando'});
-});
-
-/* ── JUEGO ─────────────────────────────────── */
-function escucharJuego(){
-    onValue(ref(db,'sesion'),(snap)=>{
-        if(!snap.exists()) return;
-        const data=snap.val();
-        if(data.mesas) actualizarLeaderboard(data.mesas);
-        if(data.estado==='terminado'){ clearInterval(timerInterval); mostrarVictoria(data.mesas); return; }
-        const idx=data.preguntaActual??0;
-        if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
-    });
-}
-
+// ── CARGAR PREGUNTA ───────────────────────────────────────
 function cargarPregunta(idx){
     if(idx>=PREGUNTAS.length) return;
     yaRespondi=false; spawnWeather();
@@ -561,21 +561,37 @@ function cargarPregunta(idx){
     document.getElementById('q-cat').textContent=q.categoria||'Climatología';
     document.getElementById('question-text').textContent=q.pregunta;
 
-    const container=document.getElementById('options-container'); container.innerHTML='';
+    const container=document.getElementById('options-container');
+    container.innerHTML='';
     const letters=['A','B','C','D'];
-    q.opciones.forEach((op,i)=>{
-        const btn=document.createElement('button'); btn.className='option-btn';
-        btn.innerHTML=`<span class="opt-letter">${letters[i]}</span><span class="opt-text">${op.texto}</span>`;
-        btn.addEventListener('click',()=>{ if(!yaRespondi) checkAnswer(op.correcta,btn,idx); });
-        container.appendChild(btn);
-    });
+
+    // Si es moderador, no puede responder
+    if(esModerador){
+        q.opciones.forEach((op,i)=>{
+            const btn=document.createElement('button');
+            btn.className='option-btn';
+            btn.disabled=true;
+            btn.innerHTML=`<span class="opt-letter">${letters[i]}</span><span class="opt-text">${op.texto}</span>`;
+            if(op.correcta) btn.classList.add('opt-correct');
+            container.appendChild(btn);
+        });
+    } else {
+        q.opciones.forEach((op,i)=>{
+            const btn=document.createElement('button');
+            btn.className='option-btn';
+            btn.innerHTML=`<span class="opt-letter">${letters[i]}</span><span class="opt-text">${op.texto}</span>`;
+            btn.addEventListener('click',()=>{ if(!yaRespondi) checkAnswer(op.correcta,btn,idx); });
+            container.appendChild(btn);
+        });
+    }
 
     updateTimerUI(TOTAL_TIME);
     document.getElementById('timer-container').classList.remove('timer-urgent');
+
     timerInterval=setInterval(()=>{
         timerSec--;
         updateTimerUI(timerSec);
-        if(timerSec<=7) document.getElementById('timer-container').classList.add('timer-urgent');
+        if(timerSec<=10) document.getElementById('timer-container').classList.add('timer-urgent');
         if(timerSec<=0){ clearInterval(timerInterval); handleTimeout(idx); }
     },1000);
 }
@@ -602,17 +618,15 @@ async function checkAnswer(isCorrect,btn,idx){
     document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
     const q=PREGUNTAS[idx];
     document.querySelectorAll('.option-btn').forEach((b,i)=>{ if(q.opciones[i]?.correcta) b.classList.add('opt-correct'); });
-
     if(isCorrect){
         btn.classList.add('opt-correct');
         const snap=await get(ref(db,`sesion/mesas/${miMesa}/puntos`));
         const pts=snap.exists()?snap.val():0;
         await set(ref(db,`sesion/mesas/${miMesa}/puntos`),pts+100);
-        setTimeout(()=>avanzarPregunta(idx),1300);
     } else {
         btn.classList.add('opt-wrong'); playAudio(audioWrong); triggerDino(btn);
-        setTimeout(()=>avanzarPregunta(idx),2200);
     }
+    setTimeout(()=>avanzarPregunta(idx), isCorrect?1300:2200);
 }
 
 async function avanzarPregunta(idx){
@@ -642,7 +656,11 @@ function triggerDino(targetBtn){
 }
 
 function actualizarLeaderboard(mesas){
-    const sorted=Object.entries(mesas).map(([k,v])=>({mesa:k,puntos:v.puntos||0})).sort((a,b)=>b.puntos-a.puntos);
+    // Excluir moderador (mesa 1) del leaderboard
+    const sorted=Object.entries(mesas)
+        .filter(([k])=>k!=='1')
+        .map(([k,v])=>({mesa:k,puntos:v.puntos||0}))
+        .sort((a,b)=>b.puntos-a.puntos);
     const medals=['🥇','🥈','🥉'],ids=['lb-1','lb-2','lb-3'];
     sorted.slice(0,3).forEach(({mesa,puntos},i)=>{
         const row=document.getElementById(ids[i]); if(!row) return;
@@ -654,7 +672,10 @@ function actualizarLeaderboard(mesas){
 function mostrarVictoria(mesas){
     clearWeather(); showScreen('screen-victory');
     document.getElementById('progress-fill').style.width='100%';
-    const sorted=Object.entries(mesas).map(([k,v])=>({mesa:k,puntos:v.puntos||0})).sort((a,b)=>b.puntos-a.puntos);
+    const sorted=Object.entries(mesas)
+        .filter(([k])=>k!=='1')
+        .map(([k,v])=>({mesa:k,puntos:v.puntos||0}))
+        .sort((a,b)=>b.puntos-a.puntos);
     document.getElementById('winner-name').textContent=`MESA ${String(sorted[0].mesa).padStart(2,'00')}`;
     const podium=document.getElementById('victory-podium'); podium.innerHTML='';
     const order=[sorted[1],sorted[0],sorted[2]];
@@ -683,9 +704,9 @@ document.getElementById('btn-restart').addEventListener('click', async ()=>{
     await remove(ref(db,'sesion'));
     document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
     document.getElementById('btn-enter').disabled=true;
-    document.getElementById('intro-text').textContent='Sincronizando sistemas · Esperando moderador';
-    document.getElementById('intro-text').classList.remove('pulse-tension');
-    preguntaLocal=-1; miMesa=null; clearWeather();
+    preguntaLocal=-1; miMesa=null; esModerador=false;
+    cuentaEnCurso=false; escuchandoJuego=false;
+    clearWeather(); clearInterval(timerInterval);
     showScreen('screen-login');
     renderMesas();
 });
