@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto Climático — IMHPA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black:#000000;--navy:#080e1f;--navy-mid:#0d1630;--navy-hi:#162040;
+            --cyan:#00f2ff;--cyan-dim:rgba(0,242,255,0.15);--cyan-glow:rgba(0,242,255,0.6);
+            --green:#00ff88;--red:#ff3355;--gold:#ffd700;--white:#ffffff;--muted:#94a3b8;
+            --border:rgba(0,242,255,0.35);--font-tech:'Orbitron',sans-serif;--font-body:'Inter',sans-serif;
+            --radius:14px;--radius-sm:8px;--transition:0.2s ease;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{background:var(--black);color:var(--white);font-family:var(--font-body);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden;}
+        @keyframes rain{from{transform:translateY(-120px) translateX(0);}to{transform:translateY(110%) translateX(40px);}}
+        .rain-drop{position:absolute;width:1.5px;background:linear-gradient(to bottom,transparent,rgba(0,242,255,0.65));border-radius:2px;animation:rain linear infinite;}
+        @keyframes lightning{0%,90%,92%,96%,100%{opacity:0;}91%,94%,97%{opacity:1;}}
+        #lightning-flash{position:absolute;inset:0;background:rgba(150,200,255,0.1);pointer-events:none;animation:lightning 4s infinite;display:none;border-radius:var(--radius);}
+        @keyframes snowfall{from{transform:translateY(-20px) rotate(0deg);opacity:0;}10%{opacity:0.6;}to{transform:translateY(110%) rotate(360deg) translateX(60px);opacity:0;}}
+        .snow-flake{position:absolute;color:rgba(200,235,255,0.85);animation:snowfall linear infinite;pointer-events:none;}
+        @keyframes aurora{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+        #aurora-layer{position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 0%,rgba(0,255,136,0.06) 30%,rgba(0,242,255,0.08) 60%,transparent 100%);background-size:400% 400%;animation:aurora 8s ease infinite;display:none;border-radius:var(--radius);}
+        .game-wrap{width:min(98vw,1400px);height:min(96vh,900px);background:rgba(4,6,16,0.93);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:0 0 60px rgba(0,242,255,0.18),inset 0 1px 0 rgba(0,242,255,0.1);padding:22px;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
+        #weather-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:var(--radius);overflow:hidden;}
+        .screen{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;}
+        .hidden{display:none!important;}
+        .logo-text{font-family:var(--font-tech);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;letter-spacing:5px;color:var(--white);text-shadow:0 0 30px var(--cyan-glow);}
+        .sub-tag{font-family:var(--font-tech);font-size:0.7rem;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-top:4px;}
+        .btn{font-family:var(--font-tech);font-weight:700;border:none;cursor:pointer;border-radius:var(--radius-sm);transition:all var(--transition);text-transform:uppercase;letter-spacing:1px;}
+        .btn-primary{background:var(--cyan);color:var(--black);padding:13px 44px;font-size:1rem;box-shadow:0 0 20px rgba(0,242,255,0.35);}
+        .btn-primary:hover:not(:disabled){background:var(--white);box-shadow:0 0 35px rgba(255,255,255,0.6);transform:translateY(-1px);}
+        .btn-primary:disabled{background:var(--navy-hi);color:#475569;cursor:not-allowed;box-shadow:none;}
+        .btn-ghost{background:transparent;color:var(--cyan);border:1.5px solid var(--cyan);padding:13px 44px;font-size:1rem;}
+        .btn-ghost:hover{background:var(--cyan-dim);box-shadow:0 0 20px var(--cyan-glow);}
+        #screen-login header{text-align:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+        #screen-login header p{color:var(--muted);font-size:0.85rem;margin-top:8px;letter-spacing:1px;}
+        .tables-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;flex:1;margin-bottom:18px;overflow:hidden;}
+        .table-card{background:rgba(13,22,48,0.7);border:1.5px solid rgba(71,85,105,0.5);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 6px;transition:all var(--transition);position:relative;overflow:hidden;}
+        .table-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-dim),transparent);opacity:0;transition:opacity var(--transition);}
+        .table-card:hover{border-color:var(--cyan);transform:translateY(-2px);}
+        .table-card:hover::before{opacity:1;}
+        .table-card.selected{border-color:var(--cyan);background:rgba(0,242,255,0.12);box-shadow:0 0 20px rgba(0,242,255,0.4),inset 0 0 10px rgba(0,242,255,0.08);transform:translateY(-2px) scale(1.03);}
+        .table-card.selected::before{opacity:1;}
+        .table-card.ocupada{border-color:var(--red);background:rgba(255,51,85,0.08);opacity:0.6;cursor:not-allowed;}
+        .table-card .icon{font-size:1.6rem;}
+        .table-card .label{font-family:var(--font-tech);font-size:0.7rem;font-weight:700;color:var(--white);letter-spacing:1px;}
+        .table-card.selected .label{color:var(--cyan);}
+        .table-card small{font-size:0.55rem;color:var(--red);font-family:var(--font-tech);}
+        .login-footer{display:flex;justify-content:center;}
+        #screen-lobby{align-items:center;justify-content:center;gap:28px;text-align:center;}
+        .lobby-badge{background:rgba(0,242,255,0.08);border:1px solid var(--border);border-radius:50px;padding:7px 20px;font-size:0.8rem;color:var(--cyan);font-family:var(--font-tech);letter-spacing:2px;animation:badgePulse 2s ease infinite;}
+        @keyframes badgePulse{0%,100%{box-shadow:0 0 10px rgba(0,242,255,0.2);}50%{box-shadow:0 0 25px rgba(0,242,255,0.5);}}
+        .lobby-logo{font-family:var(--font-tech);font-size:clamp(3rem,6vw,5rem);font-weight:900;color:var(--white);text-shadow:0 0 40px var(--cyan-glow),0 0 80px rgba(0,242,255,0.3);letter-spacing:6px;}
+        .lobby-sub{color:var(--muted);font-size:1rem;max-width:480px;line-height:1.6;}
+        #intro-text{font-size:1.1rem;color:var(--white);font-weight:600;}
+        .mesas-status{font-family:var(--font-tech);font-size:0.75rem;color:var(--cyan);letter-spacing:1px;}
+        @keyframes tensionPulse{0%,100%{transform:scale(1);color:var(--white);}50%{transform:scale(1.04);color:var(--red);}}
+        .pulse-tension{animation:tensionPulse 0.5s ease infinite;}
+        #screen-gameplay{gap:14px;}
+        .gameplay-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--navy);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 20px;gap:16px;min-height:130px;}
+        .leaderboard{display:flex;flex-direction:column;gap:5px;}
+        .lb-row{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.5);border:1px solid rgba(71,85,105,0.4);border-left:3px solid var(--cyan);padding:6px 12px;border-radius:6px;font-size:0.82rem;min-height:32px;transition:all 0.3s ease;}
+        .lb-row.top1{border-left-color:var(--gold);box-shadow:0 0 10px rgba(255,215,0,0.15);}
+        .lb-row.top2{border-left-color:#c0c0c0;}
+        .lb-row.top3{border-left-color:#cd7f32;}
+        .lb-row .lb-name{font-family:var(--font-tech);font-size:0.7rem;color:var(--white);}
+        .lb-row .lb-pts{font-family:var(--font-tech);font-size:0.75rem;font-weight:700;color:var(--cyan);}
+        .lb-row.top1 .lb-pts{color:var(--gold);}
+        .timer-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+        .timer-ring-svg{width:110px;height:110px;transform:rotate(-90deg);}
+        .timer-ring-bg{fill:none;stroke:rgba(0,242,255,0.1);stroke-width:5;}
+        .timer-ring-fill{fill:none;stroke:var(--cyan);stroke-width:5;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke 0.5s;}
+        .timer-ring-text-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+        .timer-ring-container{position:relative;width:110px;height:110px;}
+        #timer-display{font-family:var(--font-tech);font-size:1.9rem;font-weight:900;color:var(--white);text-shadow:0 0 15px var(--cyan-glow);}
+        .timer-urgent #timer-display{color:var(--red);text-shadow:0 0 15px rgba(255,51,85,0.8);}
+        .timer-urgent .timer-ring-fill{stroke:var(--red);}
+        @keyframes timerShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+        .timer-urgent{animation:timerShake 0.15s linear infinite;}
+        .timer-label{font-family:var(--font-tech);font-size:0.6rem;letter-spacing:3px;color:var(--muted);}
+        .mascot-zone{display:flex;justify-content:flex-end;align-items:flex-end;height:100%;}
+        .mascot-wrap{position:relative;height:110px;display:flex;align-items:flex-end;}
+        .mascot-img{height:110px;width:auto;animation:mascotFloat 3s ease-in-out infinite;}
+        @keyframes mascotFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+        .mascot-css{animation:mascotFloat 3s ease-in-out infinite;}
+        .mascot-body{width:80px;height:75px;background:linear-gradient(135deg,#1a3a5c,#0d2240);border:2px solid var(--cyan);border-radius:50% 50% 45% 45%;position:relative;box-shadow:0 0 18px rgba(0,242,255,0.4),inset 0 0 10px rgba(0,242,255,0.08);}
+        .mascot-face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+        .mascot-eyes{display:flex;gap:14px;}
+        .eye{width:12px;height:12px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:eyeBlink 3s ease infinite;}
+        @keyframes eyeBlink{0%,90%,100%{transform:scaleY(1);}95%{transform:scaleY(0.1);}}
+        .mascot-mouth{width:22px;height:7px;border-bottom:2.5px solid var(--cyan);border-left:2.5px solid var(--cyan);border-right:2.5px solid var(--cyan);border-radius:0 0 10px 10px;}
+        .mascot-arms{position:absolute;top:50%;width:100%;display:flex;justify-content:space-between;transform:translateY(-50%);}
+        .arm{width:14px;height:6px;background:var(--cyan);border-radius:3px;box-shadow:0 0 6px var(--cyan);}
+        .arm-l{transform:translateX(-10px) rotate(30deg);animation:armWaveL 1.5s ease-in-out infinite;}
+        .arm-r{transform:translateX(10px) rotate(-30deg);animation:armWaveR 1.5s ease-in-out infinite 0.2s;}
+        @keyframes armWaveL{0%,100%{transform:translateX(-10px) rotate(30deg);}50%{transform:translateX(-10px) rotate(60deg);}}
+        @keyframes armWaveR{0%,100%{transform:translateX(10px) rotate(-30deg);}50%{transform:translateX(10px) rotate(-60deg);}}
+        .mascot-shadow{width:50px;height:8px;background:radial-gradient(ellipse,rgba(0,242,255,0.25),transparent);margin:4px auto 0;border-radius:50%;animation:shadowPulse 3s ease-in-out infinite;}
+        @keyframes shadowPulse{0%,100%{transform:scaleX(1);opacity:0.6;}50%{transform:scaleX(0.7);opacity:0.3;}}
+        .progress-bar-wrap{display:flex;align-items:center;gap:10px;}
+        .progress-label{font-family:var(--font-tech);font-size:0.65rem;color:var(--cyan);white-space:nowrap;}
+        .progress-track{flex:1;height:4px;background:rgba(0,242,255,0.1);border-radius:99px;overflow:hidden;}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:99px;transition:width 0.5s ease;}
+        .quiz-main{flex:1;background:rgba(4,8,20,0.97);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden;}
+        .question-header{display:flex;align-items:center;gap:12px;}
+        .q-number{font-family:var(--font-tech);font-size:0.65rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);padding:4px 10px;border-radius:4px;white-space:nowrap;}
+        .q-category{font-size:0.75rem;color:var(--muted);}
+        .question-box{background:rgba(13,22,48,0.8);border:1px solid var(--border);border-radius:10px;padding:18px 22px;}
+        #question-text{font-size:clamp(1rem,2vw,1.35rem);font-weight:600;line-height:1.55;color:var(--white);}
+        .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;}
+        .option-btn{background:rgba(13,22,48,0.8);border:1.5px solid rgba(71,85,105,0.5);border-radius:10px;padding:18px 20px;cursor:pointer;text-align:left;transition:all var(--transition);display:flex;align-items:center;gap:14px;font-family:var(--font-body);position:relative;overflow:hidden;}
+        .option-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-dim),transparent);opacity:0;transition:opacity var(--transition);}
+        .option-btn:hover:not(:disabled){border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,242,255,0.15);}
+        .option-btn:hover:not(:disabled)::before{opacity:1;}
+        .option-btn:disabled{cursor:not-allowed;}
+        .opt-letter{font-family:var(--font-tech);font-size:0.75rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);border-radius:4px;padding:3px 8px;flex-shrink:0;transition:all var(--transition);}
+        .opt-text{font-size:0.95rem;font-weight:500;color:var(--white);line-height:1.45;transition:all var(--transition);}
+        .opt-correct{background:rgba(0,255,136,0.12)!important;border-color:var(--green)!important;box-shadow:0 0 20px rgba(0,255,136,0.2)!important;}
+        .opt-correct .opt-letter{background:var(--green);color:var(--black);border-color:var(--green);}
+        .opt-correct .opt-text{color:var(--green)!important;}
+        .opt-wrong{background:rgba(255,51,85,0.12)!important;border-color:var(--red)!important;box-shadow:0 0 15px rgba(255,51,85,0.15)!important;}
+        .opt-wrong .opt-letter{background:var(--red);color:var(--white);border-color:var(--red);}
+        .opt-wrong .opt-text{color:var(--red)!important;}
+        .dino-overlay{position:absolute;inset:0;pointer-events:none;z-index:20;}
+        @keyframes dinoEntry{0%{transform:translate(var(--dx),120%) scale(0.3) rotate(20deg);opacity:0;}35%{transform:translate(var(--dx),var(--dy)) scale(1.3) rotate(-5deg);opacity:1;}65%{transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(5deg);}100%{transform:translate(calc(var(--dx) - 150px),-50%) scale(0) rotate(30deg);opacity:0;}}
+        #dino-sprite{font-size:5rem;position:absolute;bottom:0;left:0;opacity:0;pointer-events:none;line-height:1;}
+        #dino-sprite.active{animation:dinoEntry 1.6s cubic-bezier(.23,1,.32,1) forwards;}
+        @keyframes bubbleUp{0%{opacity:0;transform:translateY(10px) scale(0.8);}30%,70%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-20px) scale(0.9);}}
+        #dino-bubble{position:absolute;font-family:var(--font-tech);font-size:1rem;font-weight:800;background:var(--black);color:var(--gold);padding:6px 14px;border-radius:20px;border:2px solid var(--gold);pointer-events:none;opacity:0;white-space:nowrap;}
+        #dino-bubble.active{animation:bubbleUp 1.6s ease forwards;}
+        @keyframes timeoutSlide{0%{opacity:0;transform:translateY(-20px);}20%,80%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-20px);}}
+        .timeout-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:15;pointer-events:none;}
+        .timeout-text{font-family:var(--font-tech);font-size:2rem;font-weight:900;color:var(--red);text-shadow:0 0 30px rgba(255,51,85,0.7);letter-spacing:4px;animation:timeoutSlide 1.5s ease forwards;}
+        #screen-victory{align-items:center;justify-content:center;gap:16px;text-align:center;}
+        .victory-title{font-family:var(--font-tech);font-size:0.75rem;letter-spacing:4px;color:var(--muted);}
+        #winner-name{font-family:var(--font-tech);font-size:clamp(2rem,5vw,3.8rem);font-weight:900;color:var(--cyan);text-shadow:0 0 40px var(--cyan-glow);}
+        @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+        .victory-emoji{font-size:5rem;animation:bounce 0.6s ease infinite;display:block;}
+        @keyframes confettiFall{0%{transform:translateY(-10px) rotateZ(var(--rz)) scale(1);opacity:1;}100%{transform:translateY(110vh) rotateZ(calc(var(--rz) + 720deg)) scale(0.5);opacity:0;}}
+        .confetti-piece{position:fixed;width:8px;height:14px;border-radius:2px;animation:confettiFall linear infinite;pointer-events:none;z-index:100;}
+        .victory-podium{display:flex;gap:10px;align-items:flex-end;justify-content:center;padding:10px;}
+        .podium-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+        .podium-col .medal{font-size:1.4rem;}
+        .podium-bar{width:90px;background:var(--navy-hi);border:1px solid var(--border);border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px 6px;gap:4px;transition:all 0.5s ease;}
+        .podium-col.gold .podium-bar{border-color:var(--gold);box-shadow:0 0 15px rgba(255,215,0,0.2);}
+        .podium-col.silver .podium-bar{border-color:#c0c0c0;}
+        .podium-col.bronze .podium-bar{border-color:#cd7f32;}
+        .podium-mesa{font-family:var(--font-tech);font-size:0.65rem;color:var(--white);}
+        .podium-pts{font-family:var(--font-tech);font-size:0.75rem;font-weight:700;}
+        .podium-col.gold .podium-pts{color:var(--gold);}
+        .podium-col.silver .podium-pts{color:#c0c0c0;}
+        .podium-col.bronze .podium-pts{color:#cd7f32;}
+        .victory-footer{display:flex;gap:12px;}
+        .scan-lines{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);}
+        .corner{position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;pointer-events:none;}
+        .corner-tl{top:8px;left:8px;border-width:2px 0 0 2px;}
+        .corner-tr{top:8px;right:8px;border-width:2px 2px 0 0;}
+        .corner-bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
+        .corner-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
+    </style>
+</head>
+<body>
+<div class="scan-lines"></div>
+
+<audio id="audio-bg" loop preload="auto">
+    <source src="audio/ambiente_tension.wav" type="audio/wav">
+    <source src="audio/ambiente_tension.mp3" type="audio/mpeg">
+</audio>
+<audio id="audio-wrong" preload="auto">
+    <source src="audio/explosion.wav" type="audio/wav">
+    <source src="audio/explosion.mp3" type="audio/mpeg">
+</audio>
+
+<div class="game-wrap">
+    <div id="weather-canvas">
+        <div id="lightning-flash"></div>
+        <div id="aurora-layer"></div>
+    </div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- SCREEN 1: LOGIN -->
+    <section id="screen-login" class="screen">
+        <header>
+            <div class="logo-text">RETO CLIMÁTICO</div>
+            <div class="sub-tag">Dirección de Climatología — IMHPA</div>
+            <p style="color:var(--muted);font-size:0.8rem;margin-top:10px;letter-spacing:1px;">Seleccione su Mesa Operativa para continuar</p>
+        </header>
+        <div id="tables-grid" class="tables-grid"></div>
+        <div class="login-footer">
+            <button id="btn-enter" class="btn btn-primary" disabled>Inicializar Partida</button>
+        </div>
+    </section>
+
+    <!-- SCREEN 2: LOBBY -->
+    <section id="screen-lobby" class="screen hidden">
+        <div class="lobby-badge" id="lobby-badge">MESA — CONECTADA</div>
+        <div class="lobby-logo">RETO CLIMÁTICO</div>
+        <div class="sub-tag">Dirección de Climatología — IMHPA</div>
+        <p class="lobby-sub">Sistema de evaluación de conocimientos climáticos. Responde con precisión y velocidad para escalar posiciones.</p>
+        <p id="intro-text">Sincronizando sistemas · Esperando moderador</p>
+        <div class="mesas-status" id="mesas-status"></div>
+        <button id="btn-start" class="btn btn-ghost">⚡ Lanzar Secuencia de Inicio (Moderador)</button>
+    </section>
+
+    <!-- SCREEN 3: GAMEPLAY -->
+    <section id="screen-gameplay" class="screen hidden">
+        <header class="gameplay-header">
+            <div class="leaderboard" id="leaderboard">
+                <div class="lb-row top1" id="lb-1"><span class="lb-name">🥇 —</span><span class="lb-pts">0 pts</span></div>
+                <div class="lb-row top2" id="lb-2"><span class="lb-name">🥈 —</span><span class="lb-pts">0 pts</span></div>
+                <div class="lb-row top3" id="lb-3"><span class="lb-name">🥉 —</span><span class="lb-pts">0 pts</span></div>
+            </div>
+            <div class="timer-wrap">
+                <div class="timer-ring-container" id="timer-container">
+                    <svg class="timer-ring-svg" viewBox="0 0 100 100">
+                        <circle class="timer-ring-bg" cx="50" cy="50" r="45"/>
+                        <circle class="timer-ring-fill" id="timer-ring" cx="50" cy="50" r="45"/>
+                    </svg>
+                    <div class="timer-ring-text-wrap"><span id="timer-display">30</span></div>
+                </div>
+                <div class="timer-label">SEGUNDOS</div>
+            </div>
+            <div class="mascot-zone">
+                <div class="mascot-wrap" id="mascot-wrap">
+                    <video id="mascot-src" class="mascot-img" autoplay loop muted playsinline
+                           oncanplay="this.style.display='block'; document.getElementById('mascot-css').style.display='none'"
+                           onerror="document.getElementById('mascot-css').style.display='block'"
+                           style="display:none">
+                        <source src="Diseño sin título.mp4" type="video/mp4">
+                    </video>
+                    <div id="mascot-css" class="mascot-css" style="display:block">
+                        <div class="mascot-body">
+                            <div class="mascot-face">
+                                <div class="mascot-eyes"><div class="eye"></div><div class="eye"></div></div>
+                                <div class="mascot-mouth"></div>
+                            </div>
+                            <div class="mascot-arms">
+                                <div class="arm arm-l"></div>
+                                <div class="arm arm-r"></div>
+                            </div>
+                        </div>
+                        <div class="mascot-shadow"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="progress-bar-wrap">
+            <span class="progress-label" id="q-progress">PREGUNTA 1 / 12</span>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+            <span class="progress-label" id="active-mesa">MULTIJUGADOR</span>
+        </div>
+
+        <main class="quiz-main">
+            <div class="dino-overlay">
+                <div id="dino-sprite">🦖</div>
+                <div id="dino-bubble">¡JA JA JA! 🦖💨</div>
+            </div>
+            <div class="question-header">
+                <div class="q-number" id="q-num">P01</div>
+                <div class="q-category" id="q-cat">Climatología</div>
+            </div>
+            <div class="question-box"><p id="question-text">Cargando base de datos climática…</p></div>
+            <div class="options-grid" id="options-container"></div>
+        </main>
+    </section>
+
+    <!-- SCREEN 4: VICTORY -->
+    <section id="screen-victory" class="screen hidden">
+        <div class="victory-title">SISTEMA COMPLETADO · CLASIFICACIÓN FINAL</div>
+        <span class="victory-emoji">🏆</span>
+        <div id="winner-name">MESA —</div>
+        <div class="sub-tag">Dirección de Climatología — IMHPA</div>
+        <div class="victory-podium" id="victory-podium"></div>
+        <div class="victory-footer">
+            <button id="btn-restart" class="btn btn-primary">↺ Reiniciar Sistema</button>
+        </div>
+    </section>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC8xb-ymYBm-i-sNHfR8AxvKdr_IbKd-QE",
+    authDomain: "reto-climatico.firebaseapp.com",
+    databaseURL: "https://reto-climatico-default-rtdb.firebaseio.com",
+    projectId: "reto-climatico",
+    storageBucket: "reto-climatico.firebasestorage.app",
+    messagingSenderId: "574754653779",
+    appId: "1:574754653779:web:e96ea36cf8460b55dc28a6"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+/* ── PREGUNTAS ─────────────────────────────── */
+const PREGUNTAS = [
+    { pregunta:"¿Cuántos países de Centroamérica forman parte del grupo de trabajo regional y cuáles son?", categoria:"Colaboración Regional", opciones:[{texto:"Son 6 países: Guatemala, El Salvador, Honduras, Costa Rica, Panamá y Nicaragua.",correcta:true},{texto:"Son 5 países: Guatemala, Honduras, Costa Rica, Panamá y Nicaragua — El Salvador no participa.",correcta:false}]},
+    { pregunta:"¿Qué institución de España participa en la coordinación técnica y cuál es su rol?", categoria:"Actores Institucionales", opciones:[{texto:"El CSIC lidera la coordinación científica y FIIAPP administra los fondos.",correcta:false},{texto:"AEMET aporta la coordinación técnica y metodológica; FIIAPP gestiona la implementación de EUROCLIMA+.",correcta:true}]},
+    { pregunta:"🧠 ¿Por qué es importante que cada país tenga representantes en el grupo de trabajo?", categoria:"Metodología", opciones:[{texto:"Porque cada país tiene condiciones climáticas y contextos distintos, lo que garantiza escenarios pertinentes y fortalece capacidades nacionales.",correcta:true},{texto:"Porque los organismos internacionales exigen que cada país firme los informes finales como requisito legal.",correcta:false}]},
+    { pregunta:"¿Cuál es la diferencia entre los escenarios RCP y los SSP?", categoria:"Escenarios Climáticos", opciones:[{texto:"Los RCP se basan únicamente en concentraciones de CO₂, mientras que los SSP consideran variables económicas como el PIB.",correcta:false},{texto:"Los RCP representan sendas de concentración de gases; los SSP incorporan además narrativas socioeconómicas.",correcta:true}]},
+    { pregunta:"¿Por qué se seleccionó el método PSDM para Centroamérica?", categoria:"Downscaling Estadístico", opciones:[{texto:"Porque el PSDM fue el único método evaluado en el estudio.",correcta:false},{texto:"Porque los métodos de regresión y análogos no mostraron buenos resultados; el PSDM demostró el mejor desempeño en corrección de sesgos.",correcta:true}]},
+    { pregunta:"📋 ¿Cuáles fueron los tres criterios para seleccionar los 12 modelos GCM?", categoria:"Modelos Climáticos", opciones:[{texto:"Disponibilidad de variables climáticas requeridas, buen desempeño histórico y dispersión en proyecciones futuras bajo SSP5-8.5.",correcta:true},{texto:"Resolución espacial superior a 10 km, origen en instituciones certificadas por la OMM y disponibilidad de datos.",correcta:false}]},
+    { pregunta:"¿Cómo se define una ola de calor según la presentación?", categoria:"Índices Climáticos", opciones:[{texto:"Un período de al menos 3 días consecutivos en que la temperatura máxima supera el percentil 90 de la serie histórica local.",correcta:true},{texto:"Un evento de al menos 7 días consecutivos en que la temperatura promedio supera los 35 °C.",correcta:false}]},
+    { pregunta:"¿Cómo permiten los CDDs estimar el impacto económico del cambio climático en el consumo energético?", categoria:"Índices Climáticos", opciones:[{texto:"Los CDDs se calculan restando la temperatura exterior a la interior y se usan para proyectar el número de apagones.",correcta:false},{texto:"Multiplicando los CDDs por la tarifa eléctrica local se estima el costo de refrigeración; pasar de 500 a 1000 CDDs duplica el gasto.",correcta:true}]},
+    { pregunta:"🌡️ ¿Cuáles son las tres variables climáticas requeridas para considerar un modelo GCM?", categoria:"Variables Climáticas", opciones:[{texto:"Temperatura máxima (tasmax), temperatura mínima (tasmin) y precipitación (pr).",correcta:true},{texto:"Humedad relativa, velocidad del viento y radiación solar.",correcta:false}]},
+    { pregunta:"¿Qué ocurrió en la etapa 3 del proceso de selección de modelos?", categoria:"Modelos Climáticos", opciones:[{texto:"Se aplicaron criterios de evaluación climática con GCMeval, quedando 39 modelos de 12 familias.",correcta:true},{texto:"Se realizaron simulaciones de prueba con todos los modelos disponibles y se eliminaron los que tenían errores.",correcta:false}]},
+    { pregunta:"¿Qué son las proyecciones regionalizadas de cambio climático?", categoria:"Regionalización", opciones:[{texto:"Son proyecciones de mayor resolución obtenidas mediante reducción de escala dinámica o estadística de modelos globales.",correcta:true},{texto:"Son proyecciones elaboradas directamente por cada país a partir de datos de estaciones meteorológicas locales.",correcta:false}]},
+    { pregunta:"⚠️ ¿Cuáles son las principales limitaciones en la generación de escenarios regionalizados en América Latina?", categoria:"Limitaciones", opciones:[{texto:"La principal limitación es la falta de satélites propios en la región, lo que impide recopilar datos climáticos.",correcta:false},{texto:"Distintas metodologías, múltiples bases de datos, duplicidad de esfuerzos, poca trazabilidad y dificultades de acceso a datos.",correcta:true}]}
+];
+
+const ICONOS = ["☁️","⚡","☀️","🌪️","🌊","❄️","🪐","🌍","🍂","🌈","🌦️","🌙","☄️","🌋","🌲","🌵","🌿","💧"];
+const CONFETTI_COLORS = ["#00f2ff","#00ff88","#ffd700","#ff3355","#ffffff","#a78bfa"];
+const TOTAL_TIME = 30;
+const CIRCUMFERENCE = 2 * Math.PI * 45;
+
+/* ── ESTADO ────────────────────────────────── */
+let miMesa = null;
+let yaRespondi = false;
+let timerInterval = null;
+let timerSec = TOTAL_TIME;
+let preguntaLocal = -1;
+
+/* ── AUDIO ─────────────────────────────────── */
+const audioBg    = document.getElementById('audio-bg');
+const audioWrong = document.getElementById('audio-wrong');
+function playAudio(el){ if(!el) return; el.currentTime=0; el.play().catch(()=>{}); }
+function startMusic(){ audioBg.volume=0.22; audioBg.play().catch(()=>{}); }
+
+/* ── SCREENS ───────────────────────────────── */
+const SCREENS=['screen-login','screen-lobby','screen-gameplay','screen-victory'];
+function showScreen(id){ SCREENS.forEach(s=>document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+
+/* ── WEATHER ───────────────────────────────── */
+const wCanvas=document.getElementById('weather-canvas');
+const lightning=document.getElementById('lightning-flash');
+const aurora=document.getElementById('aurora-layer');
+let wNodes=[];
+function clearWeather(){ wNodes.forEach(n=>n.remove()); wNodes=[]; lightning.style.display='none'; aurora.style.display='none'; }
+function spawnWeather(){
+    clearWeather();
+    const modes=['rain','thunder','snow','aurora'];
+    const mode=modes[Math.floor(Math.random()*modes.length)];
+    if(mode==='rain'||mode==='thunder'){
+        if(mode==='thunder') lightning.style.display='block';
+        for(let i=0;i<(mode==='thunder'?40:55);i++){const d=document.createElement('div');d.className='rain-drop';d.style.cssText=`left:${Math.random()*100}%;top:${-5-Math.random()*20}%;height:${40+Math.random()*80}px;animation-duration:${0.3+Math.random()*0.55}s;animation-delay:${Math.random()*1.5}s;opacity:${0.35+Math.random()*0.3}`;wCanvas.appendChild(d);wNodes.push(d);}
+    } else if(mode==='snow'){
+        const fl=['❄','❅','❆','✦','•','◦'];
+        for(let i=0;i<40;i++){const f=document.createElement('div');f.className='snow-flake';f.textContent=fl[Math.floor(Math.random()*fl.length)];f.style.cssText=`left:${Math.random()*100}%;top:-5%;font-size:${0.5+Math.random()*1.1}rem;animation-duration:${5+Math.random()*7}s;animation-delay:${Math.random()*6}s`;wCanvas.appendChild(f);wNodes.push(f);}
+    } else { aurora.style.display='block'; }
+}
+
+/* ── LOGIN ─────────────────────────────────── */
+const grid = document.getElementById('tables-grid');
+
+async function renderMesas(){
+    const snap = await get(ref(db,'sesion/mesas'));
+    const ocupadas = snap.exists() ? snap.val() : {};
+    grid.innerHTML='';
+    for(let i=1;i<=18;i++){
+        const btn=document.createElement('button');
+        btn.className='table-card';
+        const estaOcupada = ocupadas[i] && ocupadas[i].conectada;
+        if(estaOcupada) btn.classList.add('ocupada');
+        btn.innerHTML=`<span class="icon">${ICONOS[i-1]}</span><span class="label">MESA ${String(i).padStart(2,'0')}</span>${estaOcupada?'<small>OCUPADA</small>':''}`;
+        if(!estaOcupada){
+            btn.addEventListener('click',()=>{
+                document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
+                btn.classList.add('selected');
+                miMesa=i;
+                document.getElementById('btn-enter').disabled=false;
+                startMusic();
+            });
+        }
+        grid.appendChild(btn);
+    }
+}
+renderMesas();
+
+document.getElementById('btn-enter').addEventListener('click', async ()=>{
+    await set(ref(db,`sesion/mesas/${miMesa}`),{conectada:true,puntos:0});
+    document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — CONECTADA ✓`;
+    document.getElementById('active-mesa').textContent=`MESA ${String(miMesa).padStart(2,'0')}`;
+    showScreen('screen-lobby');
+    escucharLobby();
+});
+
+/* ── LOBBY ─────────────────────────────────── */
+function escucharLobby(){
+    onValue(ref(db,'sesion'),(snap)=>{
+        if(!snap.exists()) return;
+        const data=snap.val();
+        if(data.mesas){
+            const conectadas=Object.keys(data.mesas).filter(k=>data.mesas[k].conectada);
+            document.getElementById('mesas-status').textContent=
+                `Conectadas: ${conectadas.map(k=>'Mesa '+String(k).padStart(2,'0')).join(' · ')}`;
+        }
+        if(data.estado==='jugando'){ showScreen('screen-gameplay'); escucharJuego(); }
+        if(data.estado==='terminado'){ mostrarVictoria(data.mesas); }
+    });
+}
+
+document.getElementById('btn-start').addEventListener('click', async ()=>{
+    const t=document.getElementById('intro-text');
+    t.textContent='¡INICIALIZANDO RETO CLIMÁTICO!';
+    t.classList.add('pulse-tension');
+    playAudio(audioWrong);
+    setTimeout(async()=>{ await update(ref(db,'sesion'),{estado:'jugando',preguntaActual:0}); },1100);
+});
+
+/* ── JUEGO ─────────────────────────────────── */
+function escucharJuego(){
+    onValue(ref(db,'sesion'),(snap)=>{
+        if(!snap.exists()) return;
+        const data=snap.val();
+        if(data.mesas) actualizarLeaderboard(data.mesas);
+        if(data.estado==='terminado'){ clearInterval(timerInterval); mostrarVictoria(data.mesas); return; }
+        const idx=data.preguntaActual??0;
+        if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
+    });
+}
+
+function cargarPregunta(idx){
+    if(idx>=PREGUNTAS.length) return;
+    yaRespondi=false; spawnWeather();
+    clearInterval(timerInterval); timerSec=TOTAL_TIME;
+
+    const total=PREGUNTAS.length, current=idx+1;
+    document.getElementById('q-progress').textContent=`PREGUNTA ${current} / ${total}`;
+    document.getElementById('progress-fill').style.width=`${((current-1)/total)*100}%`;
+    document.getElementById('q-num').textContent=`P${String(current).padStart(2,'0')}`;
+    const q=PREGUNTAS[idx];
+    document.getElementById('q-cat').textContent=q.categoria||'Climatología';
+    document.getElementById('question-text').textContent=q.pregunta;
+
+    const container=document.getElementById('options-container'); container.innerHTML='';
+    const letters=['A','B','C','D'];
+    q.opciones.forEach((op,i)=>{
+        const btn=document.createElement('button'); btn.className='option-btn';
+        btn.innerHTML=`<span class="opt-letter">${letters[i]}</span><span class="opt-text">${op.texto}</span>`;
+        btn.addEventListener('click',()=>{ if(!yaRespondi) checkAnswer(op.correcta,btn,idx); });
+        container.appendChild(btn);
+    });
+
+    updateTimerUI(TOTAL_TIME);
+    document.getElementById('timer-container').classList.remove('timer-urgent');
+    timerInterval=setInterval(()=>{
+        timerSec--;
+        updateTimerUI(timerSec);
+        if(timerSec<=7) document.getElementById('timer-container').classList.add('timer-urgent');
+        if(timerSec<=0){ clearInterval(timerInterval); handleTimeout(idx); }
+    },1000);
+}
+
+function updateTimerUI(sec){
+    document.getElementById('timer-display').textContent=sec;
+    document.getElementById('timer-ring').style.strokeDashoffset=CIRCUMFERENCE*(1-sec/TOTAL_TIME);
+}
+
+function handleTimeout(idx){
+    if(yaRespondi) return; yaRespondi=true; playAudio(audioWrong);
+    document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+    const q=PREGUNTAS[idx];
+    document.querySelectorAll('.option-btn').forEach((b,i)=>{ if(q.opciones[i]?.correcta) b.classList.add('opt-correct'); });
+    const banner=document.createElement('div'); banner.className='timeout-banner';
+    banner.innerHTML='<span class="timeout-text">⏱ TIEMPO AGOTADO</span>';
+    document.querySelector('.quiz-main').appendChild(banner);
+    setTimeout(()=>{ banner.remove(); avanzarPregunta(idx); },1800);
+}
+
+async function checkAnswer(isCorrect,btn,idx){
+    yaRespondi=true; clearInterval(timerInterval);
+    document.getElementById('timer-container').classList.remove('timer-urgent');
+    document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+    const q=PREGUNTAS[idx];
+    document.querySelectorAll('.option-btn').forEach((b,i)=>{ if(q.opciones[i]?.correcta) b.classList.add('opt-correct'); });
+
+    if(isCorrect){
+        btn.classList.add('opt-correct');
+        const snap=await get(ref(db,`sesion/mesas/${miMesa}/puntos`));
+        const pts=snap.exists()?snap.val():0;
+        await set(ref(db,`sesion/mesas/${miMesa}/puntos`),pts+100);
+        setTimeout(()=>avanzarPregunta(idx),1300);
+    } else {
+        btn.classList.add('opt-wrong'); playAudio(audioWrong); triggerDino(btn);
+        setTimeout(()=>avanzarPregunta(idx),2200);
+    }
+}
+
+async function avanzarPregunta(idx){
+    const siguiente=idx+1;
+    if(siguiente>=PREGUNTAS.length){
+        await update(ref(db,'sesion'),{estado:'terminado'});
+    } else {
+        const snap=await get(ref(db,'sesion/preguntaActual'));
+        if(snap.exists()&&snap.val()===idx){
+            await update(ref(db,'sesion'),{preguntaActual:siguiente});
+        }
+    }
+}
+
+function triggerDino(targetBtn){
+    const dino=document.getElementById('dino-sprite');
+    const bubble=document.getElementById('dino-bubble');
+    const qRect=document.querySelector('.quiz-main').getBoundingClientRect();
+    const bRect=targetBtn.getBoundingClientRect();
+    dino.style.setProperty('--dx',(bRect.left-qRect.left+bRect.width/2-40)+'px');
+    dino.style.setProperty('--dy',-(qRect.bottom-bRect.top-bRect.height/2+40)+'px');
+    bubble.style.left=(bRect.left-qRect.left+10)+'px';
+    bubble.style.top=(bRect.top-qRect.top-40)+'px';
+    dino.className='active';
+    setTimeout(()=>{ bubble.className='active'; },500);
+    setTimeout(()=>{ dino.className=''; bubble.className=''; },2000);
+}
+
+function actualizarLeaderboard(mesas){
+    const sorted=Object.entries(mesas).map(([k,v])=>({mesa:k,puntos:v.puntos||0})).sort((a,b)=>b.puntos-a.puntos);
+    const medals=['🥇','🥈','🥉'],ids=['lb-1','lb-2','lb-3'];
+    sorted.slice(0,3).forEach(({mesa,puntos},i)=>{
+        const row=document.getElementById(ids[i]); if(!row) return;
+        row.querySelector('.lb-name').textContent=`${medals[i]} Mesa ${String(mesa).padStart(2,'0')}`;
+        row.querySelector('.lb-pts').textContent=`${puntos} pts`;
+    });
+}
+
+function mostrarVictoria(mesas){
+    clearWeather(); showScreen('screen-victory');
+    document.getElementById('progress-fill').style.width='100%';
+    const sorted=Object.entries(mesas).map(([k,v])=>({mesa:k,puntos:v.puntos||0})).sort((a,b)=>b.puntos-a.puntos);
+    document.getElementById('winner-name').textContent=`MESA ${String(sorted[0].mesa).padStart(2,'00')}`;
+    const podium=document.getElementById('victory-podium'); podium.innerHTML='';
+    const order=[sorted[1],sorted[0],sorted[2]];
+    const configs=[{cls:'silver',medal:'🥈',height:'80px'},{cls:'gold',medal:'🥇',height:'110px'},{cls:'bronze',medal:'🥉',height:'60px'}];
+    order.forEach((item,i)=>{
+        if(!item) return;
+        const col=document.createElement('div'); col.className=`podium-col ${configs[i].cls}`;
+        col.innerHTML=`<span class="medal">${configs[i].medal}</span><div class="podium-bar" style="height:${configs[i].height}"><div class="podium-mesa">MESA ${String(item.mesa).padStart(2,'00')}</div><div class="podium-pts">${item.puntos} pts</div></div>`;
+        podium.appendChild(col);
+    });
+    spawnConfetti();
+}
+
+function spawnConfetti(){
+    document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
+    for(let i=0;i<70;i++){
+        const el=document.createElement('div'); el.className='confetti-piece';
+        const color=CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+        const rz=(Math.random()*360)+'deg';
+        el.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*-20}%;background:${color};--rz:${rz};animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*2}s;transform:rotateZ(${rz})`;
+        document.body.appendChild(el);
+    }
+}
+
+document.getElementById('btn-restart').addEventListener('click', async ()=>{
+    await remove(ref(db,'sesion'));
+    document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
+    document.getElementById('btn-enter').disabled=true;
+    document.getElementById('intro-text').textContent='Sincronizando sistemas · Esperando moderador';
+    document.getElementById('intro-text').classList.remove('pulse-tension');
+    preguntaLocal=-1; miMesa=null; clearWeather();
+    showScreen('screen-login');
+    renderMesas();
+});
+</script>
+</body>
+</html>
