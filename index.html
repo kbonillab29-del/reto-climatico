@@ -568,7 +568,22 @@ document.getElementById('btn-enter').addEventListener('click', async ()=>{
 // ── ESCUCHAR SESIÓN (lobby + juego) ──────────────────────
 function escucharSesion(){
     onValue(ref(db,'sesion'),async (snap)=>{
-        if(!snap.exists()) return;
+        // Si el moderador reinició, Firebase queda vacío — todos vuelven al inicio
+        if(!snap.exists()){
+            if(!document.getElementById('screen-login').classList.contains('hidden')) return;
+            document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
+            preguntaLocal=0; miMesa=null; esModerador=false;
+            cuentaEnCurso=false; escuchandoJuego=false;
+            clearWeather(); clearInterval(timerInterval);
+            document.getElementById('btn-enter').disabled=true;
+            document.getElementById('lobby-badge').textContent='MESA — CONECTADA';
+            document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
+            document.getElementById('mesas-status').textContent='';
+            document.getElementById('progress-fill').style.width='0%';
+            showScreen('screen-login');
+            renderMesas();
+            return;
+        }
         const data=snap.val();
 
         // Actualizar mesas conectadas en lobby
