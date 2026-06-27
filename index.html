@@ -589,11 +589,25 @@ function escucharSesion(){
         }
         if(data.estado==='jugando' && !escuchandoJuego){
             escuchandoJuego=true;
-            // Contar mesas jugando (sin moderador)
             totalMesas = Object.keys(data.mesas||{}).filter(k=>k!=='1').length;
             showScreen('screen-gameplay');
             preguntaLocal=0;
             cargarPregunta(0);
+            // Timer global: cuando se acabe el tiempo total, forzar fin
+            if(data.finAt){
+                const msRestantes = data.finAt - Date.now();
+                if(msRestantes > 0){
+                    setTimeout(async()=>{
+                        const snap = await get(ref(db,'sesion/estado'));
+                        if(snap.exists() && snap.val() !== 'terminado'){
+                            await update(ref(db,'sesion'),{estado:'terminado'});
+                        }
+                    }, msRestantes);
+                } else {
+                    // Ya pasó el tiempo
+                    await update(ref(db,'sesion'),{estado:'terminado'});
+                }
+            }
         }
         if(data.estado==='terminado'){
             clearInterval(timerInterval);
@@ -605,8 +619,9 @@ function escucharSesion(){
 // ── MODERADOR: INICIAR ────────────────────────────────────
 document.getElementById('btn-start').addEventListener('click', async ()=>{
     document.getElementById('btn-start').disabled=true;
-    // Poner estado 'contando' en Firebase — todos verán la cuenta
-    await update(ref(db,'sesion'),{estado:'contando'});
+    const tiempoTotal = PREGUNTAS.length * TOTAL_TIME * 1000; // 5 preguntas x 60s
+    const finAt = Date.now() + tiempoTotal + 4000; // +4s para la cuenta regresiva
+    await update(ref(db,'sesion'),{estado:'contando', finAt: finAt});
 });
 
 // ── CUENTA REGRESIVA (en todas las pantallas) ─────────────
@@ -722,7 +737,7 @@ async function checkAnswer(isCorrect,btn,idx){
 async function avanzarPregunta(idx){
     const siguiente=idx+1;
     if(siguiente>=PREGUNTAS.length){
-        // Esta mesa terminó — marcarla como terminada
+        // Esta mesa terminó
         await update(ref(db,`sesion/mesas/${miMesa}`),{terminada:true});
         // Ver si TODAS las mesas terminaron
         const snap=await get(ref(db,'sesion/mesas'));
@@ -733,17 +748,17 @@ async function avanzarPregunta(idx){
             if(todasTerminadas){
                 await update(ref(db,'sesion'),{estado:'terminado'});
             } else {
-                // Mostrar pantalla de espera
+                // Mostrar pantalla de espera — el timer global terminará cuando se acabe el tiempo
+                clearInterval(timerInterval);
                 showScreen('screen-lobby');
                 document.getElementById('lobby-badge').textContent='✅ ¡Terminaste!';
                 document.getElementById('intro-text').textContent='Esperando que las demás mesas terminen...';
-                document.getElementById('mesas-status').textContent='';
+                document.getElementById('mesas-status').textContent='El tiempo se acaba automáticamente al finalizar los 5 minutos.';
                 document.getElementById('btn-start').style.display='none';
                 document.getElementById('mod-notice').style.display='none';
             }
         }
     } else {
-        // Avanzar solo esta mesa
         preguntaLocal=siguiente;
         cargarPregunta(siguiente);
     }
