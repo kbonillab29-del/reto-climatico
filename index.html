@@ -490,11 +490,6 @@ async function renderMesas(){
     modBtn.className='table-card mod-card';
     modBtn.innerHTML=`<span class="icon">🎮</span><span class="label" style="color:var(--gold)">MODERADOR</span>`;
     modBtn.addEventListener('click',()=>{
-        const clave = prompt('🔐 Ingresa la clave del moderador:');
-        if(clave !== '321'){
-            alert('Clave incorrecta. Acceso denegado.');
-            return;
-        }
         document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
         modBtn.classList.add('selected');
         miMesa=1; esModerador=true;
