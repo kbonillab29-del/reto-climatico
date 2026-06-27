@@ -452,6 +452,11 @@ async function renderMesas(){
     modBtn.className='table-card mod-card';
     modBtn.innerHTML=`<span class="icon">🎮</span><span class="label" style="color:var(--gold)">MODERADOR</span>`;
     modBtn.addEventListener('click',()=>{
+        const clave = prompt('🔐 Ingresa la clave del moderador:');
+        if(clave !== '321'){
+            alert('Clave incorrecta. Acceso denegado.');
+            return;
+        }
         document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('selected'));
         modBtn.classList.add('selected');
         miMesa=1; esModerador=true;
@@ -471,11 +476,13 @@ onValue(ref(db,'sesion/mesas'),(snap)=>{
 
 // ── ENTRAR AL LOBBY ───────────────────────────────────────
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
-    // Verificar que la mesa no esté ocupada justo antes de entrar
-    const checkSnap = await get(ref(db,`sesion/mesas/${miMesa}`));
-    if(checkSnap.exists() && checkSnap.val().conectada){
-        alert('¡Esta mesa ya está ocupada! Elige otra.');
-        return;
+    // Verificar que la mesa no esté ocupada (solo participantes, no moderador)
+    if(!esModerador){
+        const checkSnap = await get(ref(db,`sesion/mesas/${miMesa}`));
+        if(checkSnap.exists() && checkSnap.val().conectada){
+            alert('¡Esta mesa ya está ocupada! Elige otra.');
+            return;
+        }
     }
     await set(ref(db,`sesion/mesas/${miMesa}`),{conectada:true,puntos:0});
 
