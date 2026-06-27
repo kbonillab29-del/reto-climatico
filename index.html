@@ -376,7 +376,7 @@
         <div class="sub-tag">Dirección de Climatología — IMHPA</div>
         <div class="victory-podium" id="victory-podium"></div>
         <div class="victory-footer">
-            <button id="btn-restart" class="btn btn-primary">↺ Reiniciar Sistema</button>
+            <button id="btn-restart" class="btn btn-primary" style="display:none;">↺ Reiniciar Sistema</button>
         </div>
     </section>
 </div>
@@ -736,11 +736,26 @@ async function checkAnswer(isCorrect,btn,idx){
 async function avanzarPregunta(idx){
     const siguiente=idx+1;
     if(siguiente>=PREGUNTAS.length){
-        // Esta mesa terminó — marcar y esperar que el timer global termine
+        // Esta mesa terminó
         clearInterval(timerInterval);
         await update(ref(db,`sesion/mesas/${miMesa}`),{terminada:true});
-        // Mostrar pantalla de espera bonita
-        mostrarEspera();
+
+        // Ver si TODOS los participantes ya terminaron
+        const snap = await get(ref(db,'sesion/mesas'));
+        if(snap.exists()){
+            const mesas = snap.val();
+            const participantes = Object.entries(mesas).filter(([k])=>k!=='1');
+            const todosTerminaron = participantes.every(([,v])=>v.terminada===true);
+            if(todosTerminaron){
+                // Todos terminaron antes de tiempo — mostrar resultados ya
+                await update(ref(db,'sesion'),{estado:'terminado'});
+            } else {
+                // Algunos siguen — esperar el timer global
+                mostrarEspera();
+            }
+        } else {
+            mostrarEspera();
+        }
     } else {
         preguntaLocal=siguiente;
         cargarPregunta(siguiente);
@@ -787,6 +802,8 @@ function actualizarLeaderboard(mesas){
 
 function mostrarVictoria(mesas){
     clearWeather(); showScreen('screen-victory');
+    // Solo el moderador puede reiniciar
+    document.getElementById('btn-restart').style.display = esModerador ? 'block' : 'none';
     document.getElementById('progress-fill').style.width='100%';
     const sorted=Object.entries(mesas)
         .filter(([k])=>k!=='1')
