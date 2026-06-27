@@ -139,7 +139,7 @@
         .option-btn:hover:not(:disabled)::before{opacity:1;}
         .option-btn:disabled{cursor:not-allowed;}
         .opt-letter{font-family:var(--font-tech);font-size:0.75rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);border-radius:4px;padding:3px 8px;flex-shrink:0;transition:all var(--transition);}
-        .opt-text{font-size:0.95rem;font-weight:500;line-height:1.45;transition:all var(--transition);}
+        .opt-text{font-size:0.95rem;font-weight:500;line-height:1.45;transition:all var(--transition);color:var(--white);}
         .opt-correct{background:rgba(0,255,136,0.12)!important;border-color:var(--green)!important;box-shadow:0 0 20px rgba(0,255,136,0.2)!important;}
         .opt-correct .opt-letter{background:var(--green);color:var(--black);border-color:var(--green);}
         .opt-correct .opt-text{color:var(--green)!important;}
@@ -462,8 +462,21 @@ async function renderMesas(){
 }
 renderMesas();
 
+// Actualizar mesas en tiempo real mientras estamos en el login
+onValue(ref(db,'sesion/mesas'),(snap)=>{
+    if(document.getElementById('screen-login') && !document.getElementById('screen-login').classList.contains('hidden')){
+        renderMesas();
+    }
+});
+
 // ── ENTRAR AL LOBBY ───────────────────────────────────────
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
+    // Verificar que la mesa no esté ocupada justo antes de entrar
+    const checkSnap = await get(ref(db,`sesion/mesas/${miMesa}`));
+    if(checkSnap.exists() && checkSnap.val().conectada){
+        alert('¡Esta mesa ya está ocupada! Elige otra.');
+        return;
+    }
     await set(ref(db,`sesion/mesas/${miMesa}`),{conectada:true,puntos:0});
 
     if(esModerador){
