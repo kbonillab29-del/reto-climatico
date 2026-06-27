@@ -597,15 +597,14 @@ function escucharSesion(){
             if(data.finAt){
                 const msRestantes = data.finAt - Date.now();
                 if(msRestantes > 0){
-                    setTimeout(async()=>{
-                        const snap = await get(ref(db,'sesion/estado'));
-                        if(snap.exists() && snap.val() !== 'terminado'){
-                            await update(ref(db,'sesion'),{estado:'terminado'});
+                    setTimeout(()=>{
+                        // Solo el moderador escribe terminado para evitar duplicados
+                        if(esModerador){
+                            update(ref(db,'sesion'),{estado:'terminado'});
                         }
                     }, msRestantes);
                 } else {
-                    // Ya pasó el tiempo
-                    update(ref(db,'sesion'),{estado:'terminado'});
+                    if(esModerador) update(ref(db,'sesion'),{estado:'terminado'});
                 }
             }
         }
@@ -737,15 +736,25 @@ async function checkAnswer(isCorrect,btn,idx){
 async function avanzarPregunta(idx){
     const siguiente=idx+1;
     if(siguiente>=PREGUNTAS.length){
-        // Esta mesa terminó todas sus preguntas
+        // Esta mesa terminó — marcar y esperar que el timer global termine
         clearInterval(timerInterval);
         await update(ref(db,`sesion/mesas/${miMesa}`),{terminada:true});
-        // Forzar fin inmediato — no esperar a nadie más
-        await update(ref(db,'sesion'),{estado:'terminado'});
+        // Mostrar pantalla de espera bonita
+        mostrarEspera();
     } else {
         preguntaLocal=siguiente;
         cargarPregunta(siguiente);
     }
+}
+
+function mostrarEspera(){
+    // Reutilizar screen-lobby como sala de espera
+    document.getElementById('lobby-badge').textContent='✅ ¡Terminaste todas las preguntas!';
+    document.getElementById('intro-text').textContent='Esperando que se acaben los 5 minutos...';
+    document.getElementById('mesas-status').textContent='Los resultados aparecerán cuando termine el tiempo.';
+    document.getElementById('btn-start').style.display='none';
+    document.getElementById('mod-notice').style.display='none';
+    showScreen('screen-lobby');
 }
 
 function triggerDino(targetBtn){
@@ -811,9 +820,15 @@ document.getElementById('btn-restart').addEventListener('click', async ()=>{
     await remove(ref(db,'sesion'));
     document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
     document.getElementById('btn-enter').disabled=true;
-    preguntaLocal=-1; miMesa=null; esModerador=false;
+    document.getElementById('btn-enter').textContent='Inicializar Partida';
+    preguntaLocal=0; miMesa=null; esModerador=false;
     cuentaEnCurso=false; escuchandoJuego=false;
     clearWeather(); clearInterval(timerInterval);
+    // Resetear lobby
+    document.getElementById('lobby-badge').textContent='MESA — CONECTADA';
+    document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
+    document.getElementById('mesas-status').textContent='';
+    document.getElementById('progress-fill').style.width='0%';
     showScreen('screen-login');
     renderMesas();
 });
