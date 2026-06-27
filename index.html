@@ -610,6 +610,9 @@ function escucharSesion(){
             showScreen('screen-gameplay');
             preguntaLocal=0;
             cargarPregunta(0);
+            if(esModerador){
+                document.getElementById('mod-emergency').style.display='block';
+            }
 
             // Timer global: cuando se acabe el tiempo total, forzar fin
             if(data.finAt){
