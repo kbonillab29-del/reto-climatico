@@ -514,12 +514,29 @@ onValue(ref(db,'sesion/mesas'),(snap)=>{
 
 // ── ENTRAR AL LOBBY ───────────────────────────────────────
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
-    // Verificar que la partida no haya comenzado ya
+    // Verificar si la partida ya comenzó
     const sesionSnap = await get(ref(db,'sesion'));
     const estadoActual = sesionSnap.exists() ? sesionSnap.val().estado : null;
-    if(!esModerador && (estadoActual==='jugando' || estadoActual==='contando' || estadoActual==='terminado')){
-        alert('La partida ya comenzó. Espera la siguiente ronda.');
-        return;
+
+    if(!esModerador && (estadoActual==='jugando' || estadoActual==='contando')){
+        // Verificar si esta mesa ya estaba registrada (se salió accidentalmente)
+        const miMesaSnap = await get(ref(db,`sesion/mesas/${miMesa}`));
+        if(miMesaSnap.exists() && miMesaSnap.val().conectada){
+            // Reconectar — puede volver a su partida
+            document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — RECONECTADA ✓`;
+            document.getElementById('active-mesa').textContent=`MESA ${String(miMesa).padStart(2,'0')}`;
+            document.getElementById('btn-start').style.display='none';
+            document.getElementById('mod-notice').style.display='none';
+            showScreen('screen-gameplay');
+            escuchandoJuego=true;
+            preguntaLocal=0;
+            cargarPregunta(0);
+            escucharSesion();
+            return;
+        } else {
+            alert('La partida ya comenzó y tu mesa no estaba registrada. Espera la siguiente ronda.');
+            return;
+        }
     }
     // Verificar que la mesa no esté ocupada (solo participantes, no moderador)
     if(!esModerador){
