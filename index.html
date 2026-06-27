@@ -75,7 +75,7 @@
         .table-card.selected::before{opacity:1;}
         .table-card.ocupada{border-color:var(--red);background:rgba(255,51,85,0.08);opacity:0.6;cursor:not-allowed;}
         .table-card .icon{font-size:1.6rem;}
-        .table-card .label{font-family:var(--font-tech);font-size:0.7rem;font-weight:700;letter-spacing:1px;}
+        .table-card .label{font-family:var(--font-tech);font-size:0.7rem;font-weight:700;letter-spacing:1px;color:#ffffff!important;text-shadow:0 0 6px rgba(255,255,255,0.5)!important;}
         .table-card.selected .label{color:var(--cyan);}
         .table-card small{font-size:0.55rem;color:var(--red);font-family:var(--font-tech);}
         .mod-card{border-color:var(--gold)!important;background:rgba(255,215,0,0.06)!important;}
@@ -150,9 +150,9 @@
         .q-number{font-family:var(--font-tech);font-size:0.65rem;color:var(--cyan);background:var(--cyan-dim);border:1px solid var(--border);padding:4px 10px;border-radius:4px;white-space:nowrap;}
         .q-category{font-size:0.75rem;color:var(--muted);}
         .question-box{background:rgba(13,22,48,0.8);border:1px solid var(--border);border-radius:10px;padding:18px 22px;}
-        #question-text{font-size:clamp(1rem,2vw,1.35rem);font-weight:600;line-height:1.55;}
+        #question-text{font-size:clamp(1rem,2vw,1.35rem);font-weight:700;line-height:1.55;color:#ffffff!important;text-shadow:0 0 10px rgba(255,255,255,0.6)!important;}
         .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;}
-        .option-btn{background:rgba(13,22,48,0.8);border:1.5px solid rgba(71,85,105,0.5);border-radius:10px;padding:18px 20px;cursor:pointer;text-align:left;transition:all var(--transition);display:flex;align-items:center;gap:14px;font-family:var(--font-body);position:relative;overflow:hidden;}
+        .option-btn{background:rgba(13,22,48,0.8);border:1.5px solid rgba(71,85,105,0.5);border-radius:10px;padding:18px 20px;cursor:pointer;text-align:left;transition:all var(--transition);display:flex;align-items:center;gap:14px;font-family:var(--font-body);position:relative;overflow:hidden;color:#ffffff!important;}
         .option-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cyan-dim),transparent);opacity:0;transition:opacity var(--transition);}
         .option-btn:hover:not(:disabled){border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,242,255,0.15);}
         .option-btn:hover:not(:disabled)::before{opacity:1;}
@@ -674,6 +674,7 @@ function handleTimeout(idx){
     const banner=document.createElement('div'); banner.className='timeout-banner';
     banner.innerHTML='<span class="timeout-text">⏱ TIEMPO AGOTADO</span>';
     document.querySelector('.quiz-main').appendChild(banner);
+    // Sin importar si respondió o no, avanza después del banner
     setTimeout(()=>{ banner.remove(); avanzarPregunta(idx); },1800);
 }
 
