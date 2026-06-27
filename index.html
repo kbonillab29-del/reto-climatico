@@ -567,7 +567,7 @@ document.getElementById('btn-enter').addEventListener('click', async ()=>{
 
 // ── ESCUCHAR SESIÓN (lobby + juego) ──────────────────────
 function escucharSesion(){
-    onValue(ref(db,'sesion'),(snap)=>{
+    onValue(ref(db,'sesion'),async (snap)=>{
         if(!snap.exists()) return;
         const data=snap.val();
 
@@ -605,7 +605,7 @@ function escucharSesion(){
                     }, msRestantes);
                 } else {
                     // Ya pasó el tiempo
-                    await update(ref(db,'sesion'),{estado:'terminado'});
+                    update(ref(db,'sesion'),{estado:'terminado'});
                 }
             }
         }
