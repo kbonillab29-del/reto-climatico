@@ -366,6 +366,11 @@
             <div class="question-box"><p id="question-text">Cargando base de datos climática…</p></div>
             <div class="options-grid" id="options-container"></div>
         </main>
+        <div id="mod-emergency" style="display:none;text-align:center;margin-top:10px;">
+            <button id="btn-emergency" style="background:rgba(255,51,85,0.2);color:var(--red);border:1.5px solid var(--red);font-family:var(--font-tech);font-size:0.7rem;padding:8px 20px;border-radius:6px;cursor:pointer;letter-spacing:1px;">
+                ⚠ REINICIAR PARTIDA (MODERADOR)
+            </button>
+        </div>
     </section>
 
     <!-- SCREEN 5: VICTORY -->
@@ -603,6 +608,10 @@ function escucharSesion(){
             showScreen('screen-gameplay');
             preguntaLocal=0;
             cargarPregunta(0);
+            // Mostrar botón emergencia solo al moderador
+            if(esModerador){
+                document.getElementById('mod-emergency').style.display='block';
+            }
             // Timer global: cuando se acabe el tiempo total, forzar fin
             if(data.finAt){
                 const msRestantes = data.finAt - Date.now();
@@ -842,6 +851,23 @@ function spawnConfetti(){
         document.body.appendChild(el);
     }
 }
+
+document.getElementById('btn-emergency').addEventListener('click', async ()=>{
+    if(!confirm('¿Reiniciar la partida ahora? Todos volverán al inicio.')) return;
+    await remove(ref(db,'sesion'));
+    document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
+    document.getElementById('btn-enter').disabled=true;
+    preguntaLocal=0; miMesa=null; esModerador=false;
+    cuentaEnCurso=false; escuchandoJuego=false;
+    clearWeather(); clearInterval(timerInterval);
+    document.getElementById('mod-emergency').style.display='none';
+    document.getElementById('lobby-badge').textContent='MESA — CONECTADA';
+    document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
+    document.getElementById('mesas-status').textContent='';
+    document.getElementById('progress-fill').style.width='0%';
+    showScreen('screen-login');
+    renderMesas();
+});
 
 document.getElementById('btn-restart').addEventListener('click', async ()=>{
     await remove(ref(db,'sesion'));
