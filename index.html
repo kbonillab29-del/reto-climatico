@@ -299,6 +299,7 @@
         <!-- Solo visible para el moderador -->
         <button id="btn-start" class="btn btn-ghost" style="display:none;">⚡ Lanzar Secuencia de Inicio</button>
         <p id="mod-notice" class="mod-notice" style="display:none;">Eres el moderador. Cuando todas las mesas estén conectadas, presiona el botón.</p>
+
     </section>
 
     <!-- SCREEN 3: CUENTA REGRESIVA -->
@@ -554,6 +555,7 @@ document.getElementById('btn-enter').addEventListener('click', async ()=>{
         document.getElementById('btn-start').style.display='block';
         document.getElementById('mod-notice').style.display='block';
         document.getElementById('active-mesa').textContent='MODERADOR';
+
     } else {
         document.getElementById('lobby-badge').textContent=`MESA ${String(miMesa).padStart(2,'0')} — CONECTADA ✓`;
         document.getElementById('intro-text').textContent='Esperando al moderador para comenzar...';
@@ -608,10 +610,7 @@ function escucharSesion(){
             showScreen('screen-gameplay');
             preguntaLocal=0;
             cargarPregunta(0);
-            // Mostrar botón emergencia solo al moderador
-            if(esModerador){
-                document.getElementById('mod-emergency').style.display='block';
-            }
+
             // Timer global: cuando se acabe el tiempo total, forzar fin
             if(data.finAt){
                 const msRestantes = data.finAt - Date.now();
@@ -852,7 +851,8 @@ function spawnConfetti(){
     }
 }
 
-document.getElementById('btn-emergency').addEventListener('click', async ()=>{
+// Función de reinicio de emergencia
+async function reiniciarEmergencia(){
     if(!confirm('¿Reiniciar la partida ahora? Todos volverán al inicio.')) return;
     await remove(ref(db,'sesion'));
     document.querySelectorAll('.confetti-piece').forEach(c=>c.remove());
@@ -867,7 +867,9 @@ document.getElementById('btn-emergency').addEventListener('click', async ()=>{
     document.getElementById('progress-fill').style.width='0%';
     showScreen('screen-login');
     renderMesas();
-});
+}
+document.getElementById('btn-emergency').addEventListener('click', reiniciarEmergencia);
+
 
 document.getElementById('btn-restart').addEventListener('click', async ()=>{
     await remove(ref(db,'sesion'));
