@@ -29,6 +29,25 @@
         #aurora-layer{position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 0%,rgba(0,255,136,0.06) 30%,rgba(0,242,255,0.08) 60%,transparent 100%);background-size:400% 400%;animation:aurora 8s ease infinite;display:none;border-radius:var(--radius);}
 
         /* LAYOUT */
+        /* Texto blanco neón global */
+        body, .screen, p, span, div, h1, h2, h3, h4, label {
+            color: #ffffff;
+            text-shadow: 0 0 6px rgba(255,255,255,0.5);
+        }
+        /* Excepciones que tienen su propio color */
+        .sub-tag { color: var(--cyan) !important; text-shadow: 0 0 8px rgba(0,242,255,0.7) !important; }
+        .lb-pts { color: var(--cyan) !important; text-shadow: 0 0 8px rgba(0,242,255,0.7) !important; }
+        .lb-row.top1 .lb-pts { color: var(--gold) !important; text-shadow: 0 0 8px rgba(255,215,0,0.7) !important; }
+        .mesas-status { color: var(--cyan) !important; }
+        .progress-label { color: var(--cyan) !important; }
+        .q-number { color: var(--cyan) !important; }
+        .q-category { color: var(--muted) !important; text-shadow: none !important; }
+        .timer-label { color: var(--muted) !important; text-shadow: none !important; }
+        .opt-correct .opt-text { color: var(--green) !important; text-shadow: 0 0 8px rgba(0,255,136,0.7) !important; }
+        .opt-wrong .opt-text { color: var(--red) !important; text-shadow: 0 0 8px rgba(255,51,85,0.7) !important; }
+        .btn-primary { color: var(--black) !important; text-shadow: none !important; }
+        .victory-title { color: var(--muted) !important; text-shadow: none !important; }
+        #winner-name { color: var(--cyan) !important; text-shadow: 0 0 40px var(--cyan-glow) !important; }
         .game-wrap{width:min(98vw,1400px);height:min(96vh,900px);background:rgba(4,6,16,0.93);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:0 0 60px rgba(0,242,255,0.18),inset 0 1px 0 rgba(0,242,255,0.1);padding:22px;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
         #weather-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:var(--radius);overflow:hidden;}
         .screen{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;}
@@ -190,7 +209,26 @@
         /* RESPONSIVE */
         @media (max-width: 768px) {
             body{align-items:flex-start;overflow-y:auto;}
-            .game-wrap{width:100vw;height:auto;min-height:100vh;border-radius:0;border-left:none;border-right:none;padding:14px;}
+            /* Texto blanco neón global */
+        body, .screen, p, span, div, h1, h2, h3, h4, label {
+            color: #ffffff;
+            text-shadow: 0 0 6px rgba(255,255,255,0.5);
+        }
+        /* Excepciones que tienen su propio color */
+        .sub-tag { color: var(--cyan) !important; text-shadow: 0 0 8px rgba(0,242,255,0.7) !important; }
+        .lb-pts { color: var(--cyan) !important; text-shadow: 0 0 8px rgba(0,242,255,0.7) !important; }
+        .lb-row.top1 .lb-pts { color: var(--gold) !important; text-shadow: 0 0 8px rgba(255,215,0,0.7) !important; }
+        .mesas-status { color: var(--cyan) !important; }
+        .progress-label { color: var(--cyan) !important; }
+        .q-number { color: var(--cyan) !important; }
+        .q-category { color: var(--muted) !important; text-shadow: none !important; }
+        .timer-label { color: var(--muted) !important; text-shadow: none !important; }
+        .opt-correct .opt-text { color: var(--green) !important; text-shadow: 0 0 8px rgba(0,255,136,0.7) !important; }
+        .opt-wrong .opt-text { color: var(--red) !important; text-shadow: 0 0 8px rgba(255,51,85,0.7) !important; }
+        .btn-primary { color: var(--black) !important; text-shadow: none !important; }
+        .victory-title { color: var(--muted) !important; text-shadow: none !important; }
+        #winner-name { color: var(--cyan) !important; text-shadow: 0 0 40px var(--cyan-glow) !important; }
+        .game-wrap{width:100vw;height:auto;min-height:100vh;border-radius:0;border-left:none;border-right:none;padding:14px;}
             .logo-text{font-size:1.4rem;letter-spacing:2px;}
             .tables-grid{grid-template-columns:repeat(3,1fr);gap:8px;}
             .table-card{padding:10px 6px;gap:5px;}
