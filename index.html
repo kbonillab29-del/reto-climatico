@@ -312,7 +312,7 @@
             </div>
         </header>
         <div class="progress-bar-wrap">
-            <span class="progress-label" id="q-progress">PREGUNTA 1 / 12</span>
+            <span class="progress-label" id="q-progress">PREGUNTA 1 / 5</span>
             <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
             <span class="progress-label" id="active-mesa">MULTIJUGADOR</span>
         </div>
@@ -360,18 +360,26 @@ const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
 const PREGUNTAS = [
-    { pregunta:"¿Cuántos países de Centroamérica forman parte del grupo de trabajo regional y cuáles son?", categoria:"Colaboración Regional", opciones:[{texto:"Son 6 países: Guatemala, El Salvador, Honduras, Costa Rica, Panamá y Nicaragua.",correcta:true},{texto:"Son 5 países: Guatemala, Honduras, Costa Rica, Panamá y Nicaragua — El Salvador no participa.",correcta:false}]},
-    { pregunta:"¿Qué institución de España participa en la coordinación técnica y cuál es su rol?", categoria:"Actores Institucionales", opciones:[{texto:"El CSIC lidera la coordinación científica y FIIAPP administra los fondos.",correcta:false},{texto:"AEMET aporta la coordinación técnica y metodológica; FIIAPP gestiona la implementación de EUROCLIMA+.",correcta:true}]},
-    { pregunta:"🧠 ¿Por qué es importante que cada país tenga representantes en el grupo de trabajo?", categoria:"Metodología", opciones:[{texto:"Porque cada país tiene condiciones climáticas y contextos distintos, garantizando escenarios pertinentes y fortaleciendo capacidades nacionales.",correcta:true},{texto:"Porque los organismos internacionales exigen que cada país firme los informes finales como requisito legal.",correcta:false}]},
-    { pregunta:"¿Cuál es la diferencia entre los escenarios RCP y los SSP?", categoria:"Escenarios Climáticos", opciones:[{texto:"Los RCP se basan únicamente en concentraciones de CO₂, mientras que los SSP consideran variables económicas como el PIB.",correcta:false},{texto:"Los RCP representan sendas de concentración de gases; los SSP incorporan además narrativas socioeconómicas.",correcta:true}]},
-    { pregunta:"¿Por qué se seleccionó el método PSDM para Centroamérica?", categoria:"Downscaling Estadístico", opciones:[{texto:"Porque el PSDM fue el único método evaluado en el estudio.",correcta:false},{texto:"Porque los métodos de regresión y análogos no mostraron buenos resultados; el PSDM demostró el mejor desempeño en corrección de sesgos.",correcta:true}]},
-    { pregunta:"📋 ¿Cuáles fueron los tres criterios para seleccionar los 12 modelos GCM?", categoria:"Modelos Climáticos", opciones:[{texto:"Disponibilidad de variables climáticas requeridas, buen desempeño histórico y dispersión en proyecciones futuras bajo SSP5-8.5.",correcta:true},{texto:"Resolución espacial superior a 10 km, origen en instituciones certificadas por la OMM y disponibilidad de datos.",correcta:false}]},
-    { pregunta:"¿Cómo se define una ola de calor según la presentación?", categoria:"Índices Climáticos", opciones:[{texto:"Un período de al menos 3 días consecutivos en que la temperatura máxima supera el percentil 90 de la serie histórica local.",correcta:true},{texto:"Un evento de al menos 7 días consecutivos en que la temperatura promedio supera los 35 °C.",correcta:false}]},
-    { pregunta:"¿Cómo permiten los CDDs estimar el impacto económico del cambio climático en el consumo energético?", categoria:"Índices Climáticos", opciones:[{texto:"Los CDDs se calculan restando la temperatura exterior a la interior y se usan para proyectar el número de apagones.",correcta:false},{texto:"Multiplicando los CDDs por la tarifa eléctrica local se estima el costo de refrigeración; pasar de 500 a 1000 CDDs duplica el gasto.",correcta:true}]},
-    { pregunta:"🌡️ ¿Cuáles son las tres variables climáticas requeridas para considerar un modelo GCM?", categoria:"Variables Climáticas", opciones:[{texto:"Temperatura máxima (tasmax), temperatura mínima (tasmin) y precipitación (pr).",correcta:true},{texto:"Humedad relativa, velocidad del viento y radiación solar.",correcta:false}]},
-    { pregunta:"¿Qué ocurrió en la etapa 3 del proceso de selección de modelos?", categoria:"Modelos Climáticos", opciones:[{texto:"Se aplicaron criterios de evaluación climática con GCMeval, quedando 39 modelos de 12 familias.",correcta:true},{texto:"Se realizaron simulaciones de prueba con todos los modelos disponibles y se eliminaron los que tenían errores.",correcta:false}]},
-    { pregunta:"¿Qué son las proyecciones regionalizadas de cambio climático?", categoria:"Regionalización", opciones:[{texto:"Son proyecciones de mayor resolución obtenidas mediante reducción de escala dinámica o estadística de modelos globales.",correcta:true},{texto:"Son proyecciones elaboradas directamente por cada país a partir de datos de estaciones meteorológicas locales.",correcta:false}]},
-    { pregunta:"⚠️ ¿Cuáles son las principales limitaciones en la generación de escenarios regionalizados en América Latina?", categoria:"Limitaciones", opciones:[{texto:"La principal limitación es la falta de satélites propios en la región, lo que impide recopilar datos climáticos.",correcta:false},{texto:"Distintas metodologías, múltiples bases de datos, duplicidad de esfuerzos, poca trazabilidad y dificultades de acceso a datos.",correcta:true}]}
+    { pregunta:"¿Por qué es importante que cada país tenga representantes en el grupo de trabajo?", categoria:"Metodología", opciones:[
+        {texto:"Porque cada país tiene condiciones climáticas y contextos distintos, lo que garantiza escenarios pertinentes y fortalece capacidades técnicas nacionales.",correcta:true},
+        {texto:"Porque los organismos internacionales exigen que cada país firme los informes finales como requisito legal para recibir financiamiento.",correcta:false}
+    ]},
+    { pregunta:"¿Cuál es la diferencia entre los escenarios RCP y los SSP?", categoria:"Escenarios Climáticos", opciones:[
+        {texto:"Los RCP se basan únicamente en concentraciones de CO₂, mientras que los SSP consideran exclusivamente variables económicas como el PIB de cada país.",correcta:false},
+        {texto:"Los RCP representan sendas de concentración de gases, mientras que los SSP incorporan además narrativas socioeconómicas, siendo una representación más integral.",correcta:true}
+    ]},
+    { pregunta:"¿Cuáles fueron los tres criterios para seleccionar los 12 modelos GCM?", categoria:"Modelos Climáticos", opciones:[
+        {texto:"Disponibilidad de variables climáticas requeridas, buen desempeño histórico y dispersión en proyecciones futuras bajo SSP5-8.5.",correcta:true},
+        {texto:"Resolución espacial superior a 10 km, origen en instituciones certificadas por la OMM y disponibilidad de datos desde el año 1900.",correcta:false}
+    ]},
+    { pregunta:"¿Qué son las proyecciones regionalizadas de cambio climático?", categoria:"Regionalización", opciones:[
+        {texto:"Son proyecciones de mayor resolución obtenidas mediante reducción de escala dinámica o estadística de modelos globales, para generar escenarios localizados que orienten la toma de decisiones.",correcta:true},
+        {texto:"Son proyecciones elaboradas directamente por cada país a partir de datos de estaciones meteorológicas locales, sin depender de modelos climáticos globales.",correcta:false}
+    ]},
+    { pregunta:"¿Cuáles son las principales limitaciones en la generación de escenarios regionalizados en América Latina?", categoria:"Limitaciones", opciones:[
+        {texto:"La principal limitación es la falta de satélites propios en la región, lo que impide recopilar datos climáticos con suficiente resolución temporal y espacial.",correcta:false},
+        {texto:"Distintas metodologías, múltiples bases de datos, duplicidad de esfuerzos, poca trazabilidad y dificultades de acceso a datos, lo que impide comparar resultados entre países.",correcta:true}
+    ]}
 ];
 
 const ICONOS = ["☁️","⚡","☀️","🌪️","🌊","❄️","🪐","🌍","🍂","🌈","🌦️","🌙","☄️","🌋","🌲","🌵","🌿","💧"];
@@ -385,9 +393,10 @@ let esModerador = false;
 let yaRespondi = false;
 let timerInterval = null;
 let timerSec = TOTAL_TIME;
-let preguntaLocal = -1;
+let preguntaLocal = 0;   // índice propio de esta mesa
 let cuentaEnCurso = false;
 let escuchandoJuego = false;
+let totalMesas = 0;      // cuántas mesas están jugando
 
 const audioBg    = document.getElementById('audio-bg');
 const audioWrong = document.getElementById('audio-wrong');
@@ -498,13 +507,11 @@ function escucharSesion(){
         }
         if(data.estado==='jugando' && !escuchandoJuego){
             escuchandoJuego=true;
+            // Contar mesas jugando (sin moderador)
+            totalMesas = Object.keys(data.mesas||{}).filter(k=>k!=='1').length;
             showScreen('screen-gameplay');
-            const idx=data.preguntaActual??0;
-            if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
-        }
-        if(data.estado==='jugando' && escuchandoJuego){
-            const idx=data.preguntaActual??0;
-            if(idx!==preguntaLocal){ preguntaLocal=idx; cargarPregunta(idx); }
+            preguntaLocal=0;
+            cargarPregunta(0);
         }
         if(data.estado==='terminado'){
             clearInterval(timerInterval);
@@ -632,12 +639,30 @@ async function checkAnswer(isCorrect,btn,idx){
 async function avanzarPregunta(idx){
     const siguiente=idx+1;
     if(siguiente>=PREGUNTAS.length){
-        await update(ref(db,'sesion'),{estado:'terminado'});
-    } else {
-        const snap=await get(ref(db,'sesion/preguntaActual'));
-        if(snap.exists()&&snap.val()===idx){
-            await update(ref(db,'sesion'),{preguntaActual:siguiente});
+        // Esta mesa terminó — marcarla como terminada
+        await update(ref(db,`sesion/mesas/${miMesa}`),{terminada:true});
+        // Ver si TODAS las mesas terminaron
+        const snap=await get(ref(db,'sesion/mesas'));
+        if(snap.exists()){
+            const mesas=snap.val();
+            const jugando=Object.entries(mesas).filter(([k])=>k!=='1');
+            const todasTerminadas=jugando.every(([,v])=>v.terminada===true);
+            if(todasTerminadas){
+                await update(ref(db,'sesion'),{estado:'terminado'});
+            } else {
+                // Mostrar pantalla de espera
+                showScreen('screen-lobby');
+                document.getElementById('lobby-badge').textContent='✅ ¡Terminaste!';
+                document.getElementById('intro-text').textContent='Esperando que las demás mesas terminen...';
+                document.getElementById('mesas-status').textContent='';
+                document.getElementById('btn-start').style.display='none';
+                document.getElementById('mod-notice').style.display='none';
+            }
         }
+    } else {
+        // Avanzar solo esta mesa
+        preguntaLocal=siguiente;
+        cargarPregunta(siguiente);
     }
 }
 
