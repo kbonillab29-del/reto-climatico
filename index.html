@@ -514,6 +514,13 @@ onValue(ref(db,'sesion/mesas'),(snap)=>{
 
 // ── ENTRAR AL LOBBY ───────────────────────────────────────
 document.getElementById('btn-enter').addEventListener('click', async ()=>{
+    // Verificar que la partida no haya comenzado ya
+    const sesionSnap = await get(ref(db,'sesion'));
+    const estadoActual = sesionSnap.exists() ? sesionSnap.val().estado : null;
+    if(!esModerador && (estadoActual==='jugando' || estadoActual==='contando' || estadoActual==='terminado')){
+        alert('La partida ya comenzó. Espera la siguiente ronda.');
+        return;
+    }
     // Verificar que la mesa no esté ocupada (solo participantes, no moderador)
     if(!esModerador){
         const checkSnap = await get(ref(db,`sesion/mesas/${miMesa}`));
