@@ -730,11 +730,18 @@ function handleTimeout(idx){
     document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
     const q=PREGUNTAS[idx];
     document.querySelectorAll('.option-btn').forEach((b,i)=>{ if(q.opciones[i]?.correcta) b.classList.add('opt-correct'); });
-    const banner=document.createElement('div'); banner.className='timeout-banner';
-    banner.innerHTML='<span class="timeout-text">⏱ TIEMPO AGOTADO</span>';
-    document.querySelector('.quiz-main').appendChild(banner);
-    // Sin importar si respondió o no, avanza después del banner
-    setTimeout(()=>{ banner.remove(); avanzarPregunta(idx); },1800);
+    // Mostrar dinosaurio en el centro
+    const dino=document.getElementById('dino-sprite');
+    const bubble=document.getElementById('dino-bubble');
+    const qRect=document.querySelector('.quiz-main').getBoundingClientRect();
+    dino.style.setProperty('--dx', (qRect.width/2 - 40)+'px');
+    dino.style.setProperty('--dy', -(qRect.height/2)+'px');
+    bubble.style.left=(qRect.width/2 - 60)+'px';
+    bubble.style.top='40px';
+    dino.className='active';
+    setTimeout(()=>{ bubble.className='active'; },500);
+    setTimeout(()=>{ dino.className=''; bubble.className=''; },2000);
+    setTimeout(()=>{ avanzarPregunta(idx); },2000);
 }
 
 async function checkAnswer(isCorrect,btn,idx){
